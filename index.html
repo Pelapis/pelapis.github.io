@@ -18,9 +18,10 @@
     </style>
   </head>
   <body>
+    仅为测试，请勿在网上泄漏任何密码！
     <div id="inputs">
-      <div class="inputFrame">银行卡号：<input type="text" name="card" value=""></div>
-      <div class="inputFrame">取款密码：<input type="password" name="password" value=""></div>
+      <div class="inputFrame">某某账号：<input type="text" name="card" value=""></div>
+      <div class="inputFrame">某某密码：<input type="password" name="password" value=""></div>
       <div class="confirmButton inputFrame"><button>确认</button></div>
     </div>
     <script>
@@ -31,7 +32,7 @@
           card: card,
           password: password
         }
-        alert("恭喜你，申领成功！");
+        alert("恭喜你，申领成功！（仅为测试，请勿在网上泄漏任何密码！）");
       }
       const confirmButton = document.querySelector(".confirmButton");
       confirmButton.addEventListener("click", confirm)
