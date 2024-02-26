@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>输入密码</title>
+    <style>
+      #inputs {
+        margin: 10% 0px;
+      }
+      .inputFrame{
+        padding: 10px 0px;
+        text-align: center;
+      }
+      .confirmButton{
+        padding: 10px 33%;
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    仅为测试，请勿在网上泄漏任何密码！
+    <div id="inputs">
+      <div class="inputFrame">某某账号：<input type="text" name="card" value=""></div>
+      <div class="inputFrame">某某密码：<input type="password" name="password" value=""></div>
+      <div class="confirmButton inputFrame"><button>确认</button></div>
+    </div>
+    <script>
+      function confirm() {
+        let card = document.querySelector("input[name='card']").value;
+        let password = document.querySelector("input[name='password']").value;
+        let data = {
+          card: card,
+          password: password
+        }
+        alert("恭喜你，已成功！（仅为测试，请勿在网上泄漏任何密码！）");
+      }
+      const confirmButton = document.querySelector(".confirmButton");
+      confirmButton.addEventListener("click", confirm)
+    </script>
+  </body>
+</html>
