@@ -2,7 +2,7 @@ body {
     font-size: 16px;
     background-color: #f0f0f0;
     display: grid;
-    grid-template-columns: minmax(auto, 1000px);
+    grid-template-columns: minmax(auto, 1400px);
     justify-content: center;
     grid-auto-flow: row;
 }
@@ -53,7 +53,6 @@ picture {
 
 picture img {
     width: 100%;
-    max-width: 500px;
     height: auto;
 }
 
