@@ -14,8 +14,7 @@ document.querySelectorAll("button").forEach((button) => {
         // 变成小写
         name = name.toLowerCase();
         // 更改图片链接
-        const url = `https://raw.githubusercontent.com/Pelapis/invest-simulation/main/plots/py/${name}.png`;
-        document.querySelector("img").src = url;
+        document.querySelector("img").src = `imgs/${name}.png`;
 
         /* // 用一个已经定义的异步函数getData来获取数据
         data = getData(name);
