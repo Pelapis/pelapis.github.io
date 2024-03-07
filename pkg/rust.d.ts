@@ -20,9 +20,9 @@ export class DataGenerator {
 * @param {number} level
 * @param {number} hold
 * @param {number} participation
-* @returns {Float64Array}
+* @returns {PlotData}
 */
-  plot_data(level: number, hold: number, participation: number): Float64Array;
+  plot_data(level: number, hold: number, participation: number): PlotData;
 }
 /**
 */
@@ -39,21 +39,57 @@ export class DataReader {
 */
   static return_vector_from_string(content: string): Float64Array;
 }
+/**
+*/
+export class PlotData {
+  free(): void;
+/**
+*/
+  mean: number;
+/**
+*/
+  percentile10: number;
+/**
+*/
+  percentile5: number;
+/**
+*/
+  percentile90: number;
+/**
+*/
+  percentile95: number;
+/**
+*/
+  sd: number;
+}
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly data_generator: (a: number, b: number) => number;
   readonly __wbg_datareader_free: (a: number) => void;
   readonly datareader_return_vector_from_path: (a: number, b: number, c: number) => void;
   readonly datareader_return_vector_from_string: (a: number, b: number, c: number) => void;
   readonly __wbg_datagenerator_free: (a: number) => void;
   readonly datagenerator_new: (a: number, b: number, c: number, d: number) => number;
-  readonly datagenerator_plot_data: (a: number, b: number, c: number, d: number, e: number) => void;
-  readonly data_generator: (a: number, b: number) => number;
-  readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
+  readonly datagenerator_plot_data: (a: number, b: number, c: number, d: number) => number;
+  readonly __wbg_plotdata_free: (a: number) => void;
+  readonly __wbg_get_plotdata_mean: (a: number) => number;
+  readonly __wbg_set_plotdata_mean: (a: number, b: number) => void;
+  readonly __wbg_get_plotdata_sd: (a: number) => number;
+  readonly __wbg_set_plotdata_sd: (a: number, b: number) => void;
+  readonly __wbg_get_plotdata_percentile90: (a: number) => number;
+  readonly __wbg_set_plotdata_percentile90: (a: number, b: number) => void;
+  readonly __wbg_get_plotdata_percentile10: (a: number) => number;
+  readonly __wbg_set_plotdata_percentile10: (a: number, b: number) => void;
+  readonly __wbg_get_plotdata_percentile95: (a: number) => number;
+  readonly __wbg_set_plotdata_percentile95: (a: number, b: number) => void;
+  readonly __wbg_get_plotdata_percentile5: (a: number) => number;
+  readonly __wbg_set_plotdata_percentile5: (a: number, b: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+  readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_exn_store: (a: number) => void;
 }

@@ -102,6 +102,16 @@ function passStringToWasm0(arg, malloc, realloc) {
     WASM_VECTOR_LEN = offset;
     return ptr;
 }
+/**
+* @param {string} path
+* @returns {DataGenerator}
+*/
+export function data_generator(path) {
+    const ptr0 = passStringToWasm0(path, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.data_generator(ptr0, len0);
+    return DataGenerator.__wrap(ret);
+}
 
 let cachedInt32Memory0 = null;
 
@@ -131,16 +141,6 @@ function passArrayF64ToWasm0(arg, malloc) {
     getFloat64Memory0().set(arg, ptr / 8);
     WASM_VECTOR_LEN = arg.length;
     return ptr;
-}
-/**
-* @param {string} path
-* @returns {DataGenerator}
-*/
-export function data_generator(path) {
-    const ptr0 = passStringToWasm0(path, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.data_generator(ptr0, len0);
-    return DataGenerator.__wrap(ret);
 }
 
 function handleError(f, args) {
@@ -193,20 +193,11 @@ export class DataGenerator {
     * @param {number} level
     * @param {number} hold
     * @param {number} participation
-    * @returns {Float64Array}
+    * @returns {PlotData}
     */
     plot_data(level, hold, participation) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.datagenerator_plot_data(retptr, this.__wbg_ptr, level, hold, participation);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var v1 = getArrayF64FromWasm0(r0, r1).slice();
-            wasm.__wbindgen_free(r0, r1 * 8, 8);
-            return v1;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
+        const ret = wasm.datagenerator_plot_data(this.__wbg_ptr, level, hold, participation);
+        return PlotData.__wrap(ret);
     }
 }
 
@@ -265,6 +256,112 @@ export class DataReader {
         } finally {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
+    }
+}
+
+const PlotDataFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_plotdata_free(ptr >>> 0));
+/**
+*/
+export class PlotData {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(PlotData.prototype);
+        obj.__wbg_ptr = ptr;
+        PlotDataFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        PlotDataFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_plotdata_free(ptr);
+    }
+    /**
+    * @returns {number}
+    */
+    get mean() {
+        const ret = wasm.__wbg_get_plotdata_mean(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set mean(arg0) {
+        wasm.__wbg_set_plotdata_mean(this.__wbg_ptr, arg0);
+    }
+    /**
+    * @returns {number}
+    */
+    get sd() {
+        const ret = wasm.__wbg_get_plotdata_sd(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set sd(arg0) {
+        wasm.__wbg_set_plotdata_sd(this.__wbg_ptr, arg0);
+    }
+    /**
+    * @returns {number}
+    */
+    get percentile90() {
+        const ret = wasm.__wbg_get_plotdata_percentile90(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set percentile90(arg0) {
+        wasm.__wbg_set_plotdata_percentile90(this.__wbg_ptr, arg0);
+    }
+    /**
+    * @returns {number}
+    */
+    get percentile10() {
+        const ret = wasm.__wbg_get_plotdata_percentile10(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set percentile10(arg0) {
+        wasm.__wbg_set_plotdata_percentile10(this.__wbg_ptr, arg0);
+    }
+    /**
+    * @returns {number}
+    */
+    get percentile95() {
+        const ret = wasm.__wbg_get_plotdata_percentile95(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set percentile95(arg0) {
+        wasm.__wbg_set_plotdata_percentile95(this.__wbg_ptr, arg0);
+    }
+    /**
+    * @returns {number}
+    */
+    get percentile5() {
+        const ret = wasm.__wbg_get_plotdata_percentile5(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set percentile5(arg0) {
+        wasm.__wbg_set_plotdata_percentile5(this.__wbg_ptr, arg0);
     }
 }
 
