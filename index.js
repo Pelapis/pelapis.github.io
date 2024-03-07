@@ -35,16 +35,18 @@ import * as wasm from "./pkg/rust.js";
   document.querySelector("button:nth-child(1)").click();
 })().catch(console.log("Promise Rejected"));
 
-
-
 // Highcharts
 function plot(chartDom, x, plot_data) {
-  const interval = plot_data.map((i, index) => [x[index], i.percentile10, i.percentile90]);
+  const interval = plot_data.map((i, index) => [
+    x[index],
+    i.percentile10,
+    i.percentile90,
+  ]);
   const mean = plot_data.map((i, index) => [x[index], i.mean]);
 
   Highcharts.chart(chartDom, {
     title: {
-      text: 'Mean and 90% Confidence Interval'
+      text: "Mean and 90% Confidence Interval",
     },
     xAxis: { type: "logarithmic" },
     yAxis: {},
@@ -52,32 +54,34 @@ function plot(chartDom, x, plot_data) {
       crosshairs: true,
       shared: true,
     },
-    series: [{
-      name: 'Mean',
-      data: mean,
-      zIndex: 1,
-      marker: {
-        fillColor: 'white',
-        lineWidth: 2,
-        lineColor: Highcharts.getOptions().colors[0]
-      }
-    }, {
-      name: '90% Interval',
-      data: interval,
-      type: 'arearange',
-      lineWidth: 0,
-      linkedTo: ':previous',
-      color: Highcharts.getOptions().colors[0],
-      fillOpacity: 0.3,
-      zIndex: 0,
-      marker: {
-        enabled: false
-      }
-    }]
+    series: [
+      {
+        name: "Mean",
+        data: mean,
+        zIndex: 1,
+        marker: {
+          fillColor: "white",
+          lineWidth: 2,
+          lineColor: Highcharts.getOptions().colors[0],
+        },
+      },
+      {
+        name: "90% Interval",
+        data: interval,
+        type: "arearange",
+        lineWidth: 0,
+        linkedTo: ":previous",
+        color: Highcharts.getOptions().colors[0],
+        fillOpacity: 0.3,
+        zIndex: 0,
+        marker: {
+          enabled: false,
+        },
+      },
+    ],
+    credits: { enabled: false },
   });
 }
-
-
 
 /* // G2
 function plot(chartDom, x, plot_data) {
@@ -120,8 +124,6 @@ function plot(chartDom, x, plot_data) {
   chart.render();
 }
  */
-
-
 
 // Echarts
 /* function plot(chartDom, x, y_mean, y_upper, y_lower) {
