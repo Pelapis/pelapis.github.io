@@ -12,8 +12,7 @@ document.querySelectorAll("button").forEach((button) => {
     // 对应的图片显示加载中转圈的动画
     const figures = document.querySelectorAll(".plot");
     figures.forEach((figure) => {
-      figure.innerHTML =
-        '<div class="loader" sytle="text-align:center">正在加载</div>';
+      figure.innerHTML = "<p>正在加载...</p>";
     });
     // 发送消息给Worker
     const name = button.innerText.toLowerCase(); // 获取按钮内部文本

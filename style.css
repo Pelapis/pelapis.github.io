@@ -59,10 +59,13 @@ figure {
 }
 
 figure div {
+    display: grid;
     width: 90vw;
     max-width: 900px;
     height: 60vw;
     max-height: 600px;
+    justify-content: center;
+    align-items: center;
 }
 
 figure figcaption {
@@ -97,24 +100,4 @@ aside button:active {
 a {
     color: burlywood;
     text-decoration: none;
-}
-
-/* 设计加载中动画 */
-@keyframes loading {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.loading {
-    display: inline-block;
-    width: 1em;
-    height: 1em;
-    border: 0.2em solid #333;
-    border-top: 0.2em solid #fff;
-    border-radius: 50%;
-    animation: loading 1s linear infinite;
 }
