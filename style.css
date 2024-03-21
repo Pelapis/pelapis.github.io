@@ -98,3 +98,23 @@ a {
     color: burlywood;
     text-decoration: none;
 }
+
+/* 设计加载中动画 */
+@keyframes loading {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 0.2em solid #333;
+    border-top: 0.2em solid #fff;
+    border-radius: 50%;
+    animation: loading 1s linear infinite;
+}
