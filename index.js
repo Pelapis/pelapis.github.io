@@ -9,7 +9,7 @@ document.querySelectorAll("button").forEach((button) => {
       active_button.classList.remove("active");
     }
     button.classList.add("active");
-    // 对应的图片显示加载中转圈的动画
+    // 对应的图片显示加载中
     const figures = document.querySelectorAll(".plot");
     figures.forEach((figure) => {
       figure.innerHTML = "<p>正在加载...</p>";
