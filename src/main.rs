@@ -41,7 +41,6 @@ fn Example() -> Element {
 #[component]
 fn App() -> Element {
     rsx! {
-        html { lang: "zh-CN",
             head {
                 meta { charset: "UTF-8" }
                 meta {
@@ -92,6 +91,5 @@ fn App() -> Element {
                 Example {}
                 script { src: "index.js", r#type: "module" }
             }
-        }
     }
 }
