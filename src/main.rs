@@ -42,6 +42,7 @@ fn Example() -> Element {
 fn App() -> Element {
     rsx! {
             head {
+                class: "navbar bg-base-300 justify-center",
                 meta { charset: "UTF-8" }
                 meta {
                     content: "width=device-width, initial-scale=1.0",
@@ -77,6 +78,7 @@ fn App() -> Element {
                     }
                 }
                 footer {
+                    class: "footer footer-center p-4 bg-base-300 text-base-content",
                     p {
                         "\n        Made by "
                         strong { "Cavendish" }
