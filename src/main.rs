@@ -10,35 +10,6 @@ fn main() {
 }
 
 #[component]
-fn Example() -> Element {
-    // Build cool things ✌️
-    rsx! {
-        link { rel: "stylesheet", href: "main.css" }
-        img { src: "header.svg", id: "header" }
-        div { id: "links",
-            a { target: "_blank", href: "https://dioxuslabs.com/learn/0.5/", "📚 Learn Dioxus" }
-            a { target: "_blank", href: "https://dioxuslabs.com/awesome", "🚀 Awesome Dioxus" }
-            a {
-                target: "_blank",
-                href: "https://github.com/dioxus-community/",
-                "📡 Community Libraries"
-            }
-            a {
-                target: "_blank",
-                href: "https://github.com/DioxusLabs/dioxus-std",
-                "⚙️ Dioxus Standard Library"
-            }
-            a {
-                target: "_blank",
-                href: "https://marketplace.visualstudio.com/items?itemName=DioxusLabs.dioxus",
-                "💫 VSCode Extension"
-            }
-            a { target: "_blank", href: "https://discord.gg/XgGxMSkvUM", "👋 Community Discord" }
-        }
-    }
-}
-
-#[component]
 fn App() -> Element {
     rsx! {
             head {
@@ -49,9 +20,7 @@ fn App() -> Element {
                     name: "viewport"
                 }
                 title { "主页" }
-                link { href: "style.css", rel: "stylesheet" }
-                script { src: "highcharts.js" }
-                script { src: "highcharts-more.js" }
+                link { href: "daisyui_full.min.css", rel: "stylesheet" }
             }
             body {
                 header {
@@ -90,7 +59,6 @@ fn App() -> Element {
                     }
                     a { href: "snake/index.html", "贪吃蛇🐍小游戏" }
                 }
-                Example {}
                 script { src: "index.js", r#type: "module" }
             }
     }
