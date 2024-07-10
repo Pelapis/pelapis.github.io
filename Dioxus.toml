@@ -1,7 +1,7 @@
 [application]
 
 # App (Project) Name
-name = "dioxus-page"
+name = "Investment Simulation - dioxus"
 
 # Dioxus App Default Platform
 # desktop, web
