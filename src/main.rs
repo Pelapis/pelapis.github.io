@@ -14,7 +14,9 @@ fn App() -> Element {
     rsx! {
         link { href: "daisyui_full.min.css", rel: "stylesheet" }
         header {
-            h1 { class: "btn btn-ghost text-xl place-self-center", "Investment Simulation Plots" }
+            h1 { class: "btn btn-ghost text-xl place-self-center text-center",
+                "Investment Simulation Plots"
+            }
         }
         header { class: "navbar bg-base-300 justify-center",
             p { "CSI300 Index, Maotai and Mengjie" }
