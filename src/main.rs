@@ -49,15 +49,14 @@ fn App() -> Element {
             }
             footer { class: "footer footer-center p-4 bg-base-300 text-base-content",
                 p {
-                    "\n        Made by "
+                    "Made by "
                     strong { "Cavendish" }
-                    ". The source code is on\n        "
+                    ". The source code is on"
                     a { href: "https://github.com/Pelapis/invest-simulation", "GitHub" }
-                    ".\n      "
+                    "."
                 }
                 a { href: "snake/index.html", "贪吃蛇🐍小游戏" }
             }
-            script { src: "index.js", r#type: "module" }
         }
     }
 }
