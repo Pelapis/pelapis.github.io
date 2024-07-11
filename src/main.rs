@@ -13,7 +13,8 @@ fn main() {
 fn App() -> Element {
     rsx! {
         link { href: "daisyui_full.min.css", rel: "stylesheet" }
-        header {
+        body { class: "flex flex-col items-center",
+        header { class: "flex justify-center",
             h1 { class: "btn btn-ghost text-xl place-self-center text-center",
                 "Investment Simulation Plots"
             }
@@ -51,5 +52,6 @@ fn App() -> Element {
             }
             a { href: "snake/index.html", "贪吃蛇🐍小游戏" }
         }
+    }
     }
 }
