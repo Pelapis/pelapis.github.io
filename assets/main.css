@@ -570,21 +570,18 @@ video {
   justify-content: center;
 }
 
-.place-self-center {
-  place-self: center;
-}
-
 .p-4 {
   padding: 1rem;
-}
-
-.text-center {
-  text-align: center;
 }
 
 .text-xl {
   font-size: 1.25rem;
   line-height: 1.75rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 
 /**

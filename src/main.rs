@@ -14,8 +14,10 @@ fn App() -> Element {
     rsx! {
         link { href: "main.css", rel: "stylesheet" }
         body { class: "flex flex-col items-center",
-            h1 { class: "btn btn-ghost text-xl", "Investment Simulation Plots" }
-            p { "CSI300 Index, Maotai and Mengjie" }
+            header { class: "navbar bg-neutral text-neutral-content justify-center flex-col",
+                h1 { class: "btn btn-ghost text-xl", "Investment Simulation Plots" }
+                p { class: "text-sm", "CSI300 Index, Maotai and Mengjie" }
+            }
             div { role: "tablist", class: "tabs tabs-boxed",
                 button { role: "tab", class: "tab", "Index" }
                 button { role: "tab", class: "tab tab-active", "Maotai" }
