@@ -17,9 +17,9 @@ fn App() -> Element {
             h1 { class: "btn btn-ghost text-xl", "Investment Simulation Plots" }
             p { "CSI300 Index, Maotai and Mengjie" }
             div { role: "tablist", class: "tabs tabs-boxed",
-                button { "Index" }
-                button { "Maotai" }
-                button { "Mengjie" }
+                button { role: "tab", class: "tab", "Index" }
+                button { role: "tab", class: "tab tab-active", "Maotai" }
+                button { role: "tab", class: "tab", "Mengjie" }
             }
             main { id: "figures",
                 figure {
@@ -46,7 +46,7 @@ fn App() -> Element {
                         }
                     }
                 }
-                a { href: "snake/index.html", "贪吃蛇🐍小游戏 dffdfssfdw" }
+                a { href: "snake/index.html", "贪吃蛇🐍小游戏" }
             }
         }
     }
