@@ -18,7 +18,7 @@ fn App() -> Element {
                 h1 { class: "btn btn-ghost text-xl", "Investment Simulation Plots" }
                 p { class: "text-sm", "CSI300 Index, Maotai and Mengjie" }
             }
-            div { role: "tablist", class: "tabs tabs-boxed",
+            nav { role: "tablist", class: "tabs tabs-boxed",
                 button { role: "tab", class: "tab", "Index" }
                 button { role: "tab", class: "tab tab-active", "Maotai" }
                 button { role: "tab", class: "tab", "Mengjie" }
