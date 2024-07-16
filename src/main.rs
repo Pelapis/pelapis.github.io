@@ -11,6 +11,7 @@ fn main() {
 
 #[component]
 fn App() -> Element {
+    let mut stock_no = use_signal(|| 0);
     rsx! {
         link { href: "main.css", rel: "stylesheet" }
         body { class: "flex flex-col items-center",
@@ -19,9 +20,30 @@ fn App() -> Element {
                 p { class: "text-sm", "CSI300 Index, Maotai and Mengjie" }
             }
             nav { role: "tablist", class: "tabs tabs-boxed",
-                button { role: "tab", class: "tab", "Index" }
-                button { role: "tab", class: "tab tab-active", "Maotai" }
-                button { role: "tab", class: "tab", "Mengjie" }
+                button {
+                    role: "tab",
+                    class: if *stock_no.read() == 0 { "tab tab-active" } else { "tab" },
+                    onclick: move |_| {
+                        *stock_no.write() = 0;
+                    },
+                    "Index"
+                }
+                button {
+                    role: "tab",
+                    class: if *stock_no.read() == 1 { "tab tab-active" } else { "tab" },
+                    onclick: move |_| {
+                        *stock_no.write() = 1;
+                    },
+                    "Maotai"
+                }
+                button {
+                    role: "tab",
+                    class: if *stock_no.read() == 2 { "tab tab-active" } else { "tab" },
+                    onclick: move |_| {
+                        *stock_no.write() = 2;
+                    },
+                    "Mengjie"
+                }
             }
             main { id: "figures",
                 figure {
