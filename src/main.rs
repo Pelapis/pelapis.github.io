@@ -2,15 +2,29 @@
 
 use dioxus::prelude::*;
 use tracing::Level;
+use dioxus_router::prelude::*;
 
 fn main() {
     // Init logger
     dioxus_logger::init(Level::INFO).expect("failed to init logger");
-    launch(App);
+    launch(|| {
+        rsx!(
+            Router::<Route> {}
+        )
+    });
+}
+
+#[derive(Routable, Clone, Debug, PartialEq)]
+enum Route {
+    #[route("/")]
+    Home {},
+
+    #[route("/snake")]
+    Snake {},
 }
 
 #[component]
-fn App() -> Element {
+fn Home() -> Element {
     let mut stock_no = use_signal(|| 0);
     rsx! {
         link { href: "main.css", rel: "stylesheet" }
@@ -70,8 +84,13 @@ fn App() -> Element {
                         }
                     }
                 }
-                a { href: "snake/index.html", "贪吃蛇🐍小游戏" }
+                Link { to: Route::Snake {}, class: "btn btn-primary", "贪吃蛇🐍小游戏" }
             }
         }
     }
+}
+
+#[component]
+fn Snake() -> Element {
+    rsx! {  }
 }
