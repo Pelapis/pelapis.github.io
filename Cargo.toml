@@ -1,0 +1,8 @@
+[package]
+name = "personal-page"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+leptos = { version = "0.6.15", features = ["csr"] }
+leptos_router = { version = "0.6.15", features = ["csr"] }
