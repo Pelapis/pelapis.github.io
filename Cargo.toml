@@ -7,3 +7,4 @@ edition = "2021"
 charming = { version = "0.4.0", features = ["wasm"] }
 leptos = { version = "0.6.15", features = ["csr"] }
 leptos_router = { version = "0.6.15", features = ["csr"] }
+reqwest = "0.12.8"

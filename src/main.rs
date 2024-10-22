@@ -1,3 +1,8 @@
+use charming::component::Grid;
+use charming::element::{
+    AreaStyle, AxisLabel, AxisPointer, AxisPointerType, Formatter, ItemStyle, Label, LineStyle,
+    Symbol, Tooltip, Trigger,
+};
 use charming::{
     component::{Axis, Title},
     element::AxisType,
@@ -45,6 +50,7 @@ fn Home() -> impl IntoView {
             action.dispatch(());
         };
     });
+    // 获取数据
 
     view! {
     <header>
@@ -101,4 +107,89 @@ fn Snake() -> impl IntoView {
             <a href="/">{"Home"}</a>
         </div>
     }
+}
+
+pub fn chart(data: Vec<DataItem>) -> Chart {
+
+    let base = -data
+        .iter()
+        .fold(f64::INFINITY, |min, val| f64::floor(f64::min(min, val.l)));
+
+    Chart::new()
+      .title(
+          Title::new()
+              .text("Confidence Band")
+              .subtext("Example in MetricsGraphics.js")
+              .left("center"),
+      )
+      .tooltip(
+          Tooltip::new()
+              .trigger(Trigger::Axis)
+              .axis_pointer(
+                  AxisPointer::new().type_(AxisPointerType::Cross).label(
+                      Label::new()
+                          .background_color("#ccc")
+                          .border_color("#aaa")
+                          .border_width(1)
+                          .shadow_blur(0)
+                          .shadow_offset_x(0)
+                          .shadow_offset_y(0)
+                          .color("#222"),
+                  ),
+              )
+              .formatter(
+                  Formatter::Function(
+                      format!("function (params) {{ return (params[2].name + '<br />' + ((params[2].value - {}) * 100).toFixed(1) + '%'); }}", base
+                  ).into())
+              ),
+      )
+      .grid(Grid::new().left("3%").right("4%").bottom("3%").contain_label(true))
+      .x_axis(
+          Axis::new()
+              .type_(AxisType::Category)
+              .data(data.iter().map(|x| x.day.to_string()).collect())
+              .boundary_gap(false)
+      )
+      .y_axis(
+          Axis::new()
+              .axis_label(AxisLabel::new().formatter(
+                  Formatter::Function(format!("function (val) {{ return (val - {}) * 100 + '%'; }}", base).into()))
+              )
+              .axis_pointer(
+                  AxisPointer::new().label(
+                      Label::new().formatter(
+                          Formatter::Function(format!("function (params) {{ return ((params.value - {}) * 100).toFixed(1) + '%'; }}", base).into())
+                      )
+                  )
+              ).split_number(3)
+      )
+      .series(
+          Line::new()
+              .name("L")
+              .data(data.iter().map(|x| x.l + base).collect())
+              .line_style(LineStyle::new().opacity(0))
+              .stack("confidence-band")
+              .symbol(Symbol::None)
+      )
+      .series(
+          Line::new()
+              .name("U")
+              .data(data.iter().map(|x| x.u - x.l).collect())
+              .line_style(LineStyle::new().opacity(0))
+              .area_style(AreaStyle::new().color("#ccc"))
+              .stack("confidence-band")
+              .symbol(Symbol::None)
+      )
+      .series(
+          Line::new()
+              .data(data.iter().map(|x| x.value + base).collect())
+              .item_style(ItemStyle::new().color("#333"))
+              .show_symbol(false))
+}
+
+struct DataItem {
+  day: i32,
+  value: f64,
+  l: f64,
+  u: f64,
 }
