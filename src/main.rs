@@ -1,3 +1,9 @@
+use charming::{
+    component::{Axis, Title},
+    element::AxisType,
+    series::Line,
+    Chart, WasmRenderer,
+};
 use leptos::*;
 use leptos_router::*;
 
@@ -19,8 +25,26 @@ fn App() -> impl IntoView {
 
 #[component]
 fn Home() -> impl IntoView {
+    let stock = create_rw_signal(1);
+    let action = create_action(|_input: &()| async {
+        let chart = Chart::new()
+            .title(Title::new().text("Demo: Leptos + Charming"))
+            .x_axis(
+                Axis::new()
+                    .type_(AxisType::Category)
+                    .data(vec!["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]),
+            )
+            .y_axis(Axis::new().type_(AxisType::Value))
+            .series(Line::new().data(vec![150, 230, 224, 218, 135, 147, 260]));
 
-    let mut stock = create_rw_signal(0);
+        let renderer = WasmRenderer::new(600, 400);
+        renderer.render("chart", &chart).unwrap();
+    });
+    create_effect(move |_| {
+        if stock.get() == 0 {
+            action.dispatch(());
+        };
+    });
 
     view! {
     <header>
@@ -36,15 +60,16 @@ fn Home() -> impl IntoView {
         on:click={move |_| stock.set(1)}
         class={move || if stock.get() == 1 { "active" } else { "" }}
       >"Maotai"</button>
-      <button 
+      <button
         on:click={move |_| stock.set(2)}
         class={move || if stock.get() == 2 { "active" } else { "" }}
       >"Mengjie"</button>
     </aside>
-    <h1>{move || stock.get()}</h1>
     <main id="figures">
       <figure>
-        <div class="plot">"收益对持有期曲线图"</div>
+        <div class="plot"
+          id="chart"
+        >"收益对持有期曲线图"</div>
         <figcaption>"低水平组🙁（正确率0.45）"</figcaption>
       </figure>
       <figure>
