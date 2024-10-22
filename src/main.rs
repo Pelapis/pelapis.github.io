@@ -19,16 +19,29 @@ fn App() -> impl IntoView {
 
 #[component]
 fn Home() -> impl IntoView {
+
+    let mut stock = create_rw_signal(0);
+
     view! {
     <header>
       <h1>"Investment Simulation Plots"</h1>
       <p>"CSI300 Index, Maotai and Mengjie"</p>
     </header>
     <aside>
-      <button>"Index"</button>
-      <button>"Maotai"</button>
-      <button>"Mengjie"</button>
+      <button
+        on:click={move |_| stock.set(0)}
+        class={move || if stock.get() == 0 { "active" } else { "" }}
+      >"Index"</button>
+      <button
+        on:click={move |_| stock.set(1)}
+        class={move || if stock.get() == 1 { "active" } else { "" }}
+      >"Maotai"</button>
+      <button 
+        on:click={move |_| stock.set(2)}
+        class={move || if stock.get() == 2 { "active" } else { "" }}
+      >"Mengjie"</button>
     </aside>
+    <h1>{move || stock.get()}</h1>
     <main id="figures">
       <figure>
         <div class="plot">"收益对持有期曲线图"</div>
