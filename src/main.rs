@@ -11,6 +11,7 @@ use charming::{
 };
 use leptos::*;
 use leptos_router::*;
+use rand::random;
 
 fn main() {
     mount_to_body(move || view! { <App /> });
@@ -110,7 +111,6 @@ fn Snake() -> impl IntoView {
 }
 
 pub fn chart(data: Vec<DataItem>) -> Chart {
-
     let base = -data
         .iter()
         .fold(f64::INFINITY, |min, val| f64::floor(f64::min(min, val.l)));
@@ -147,7 +147,7 @@ pub fn chart(data: Vec<DataItem>) -> Chart {
       .x_axis(
           Axis::new()
               .type_(AxisType::Category)
-              .data(data.iter().map(|x| x.day.to_string()).collect())
+              .data(data.iter().map(|x| x.date.clone()).collect())
               .boundary_gap(false)
       )
       .y_axis(
@@ -187,9 +187,82 @@ pub fn chart(data: Vec<DataItem>) -> Chart {
               .show_symbol(false))
 }
 
+#[derive(Clone)]
 struct DataItem {
-  day: i32,
-  value: f64,
-  l: f64,
-  u: f64,
+    date: String,
+    value: f64,
+    l: f64,
+    u: f64,
+}
+
+fn compute_data() -> Vec<DataItem> {
+    let text: &str = "";
+    let investor_count: usize = 100;
+    let trading_cost: f64 = 0.001;
+    let level: f64 = 0.5;
+    let participation: f64 = 0.45;
+    let days = vec![1, 2, 3, 5, 10, 21, 63, 250, 1250, 2500];
+    let day_names = vec![
+        "1天", "2天", "3天", "1周", "2周", "1月", "1季度", "1年", "5年", "10年",
+    ];
+
+    // 数据预处理
+    let return_vector: Vec<f64> = text
+        .lines()
+        .filter_map(|line| line.split(',').nth(2)?.parse::<f64>().ok())
+        .collect();
+
+    let mut data: Vec<DataItem> = vec![
+        DataItem {
+            date: String::new(),
+            value: 0.,
+            l: 0.,
+            u: 0.,
+        };
+        days.len()
+    ];
+
+    for (i, hold_day) in days.iter().enumerate() {
+        let hold_count = return_vector.len().div_ceil(*hold_day);
+        let adjusted_return: Vec<f64> = (0..hold_count)
+            .map(|i| {
+                return_vector[i * hold_day..return_vector.len().min((i + 1) * hold_day)]
+                    .iter()
+                    .product()
+            })
+            .collect();
+        // 生成需要的随机数
+        let random_matrix: Vec<Vec<f64>> = (0..investor_count)
+            .map(|_| (0..hold_count).map(|_| random::<f64>()).collect())
+            .collect();
+        // 计算各投资者的最终收益率
+        let mut investor_returns: Vec<f64> = (0..investor_count)
+            .map(|i| {
+                adjusted_return
+                    .iter()
+                    .zip(random_matrix[i].iter())
+                    .fold(1., |acc, (&e, &r)| {
+                        let growing = e > 1.;
+                        let win = r < level;
+                        let participating = r < participation;
+                        if growing == win && participating {
+                            acc * e * (1. - trading_cost)
+                        } else {
+                            acc
+                        }
+                    })
+            })
+            .collect();
+        // 计算统计学特征，只保留一个数值
+        let mean = investor_returns.iter().sum::<f64>() / investor_count as f64;
+        investor_returns.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        let percentile10 = investor_returns[(investor_count as f64 * 0.1 - 1.).ceil() as usize];
+        let percentile90 = investor_returns[(investor_count as f64 * 0.9 - 1.).ceil() as usize];
+        data[i].value = mean;
+        data[i].l = percentile10;
+        data[i].u = percentile90;
+        data[i].date = day_names[i].to_string();
+    }
+
+    data
 }
