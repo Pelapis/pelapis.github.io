@@ -1,3 +1,5 @@
+use std::thread;
+
 use charming::component::Grid;
 use charming::element::{
     AreaStyle, AxisLabel, AxisPointer, AxisPointerType, Formatter, ItemStyle, Label, LineStyle,
@@ -12,6 +14,7 @@ use charming::{
 use leptos::*;
 use leptos_router::*;
 use rand::random;
+use serde::{Deserialize, Serialize};
 
 fn main() {
     mount_to_body(move || view! { <App /> });
@@ -32,72 +35,83 @@ fn App() -> impl IntoView {
 #[component]
 fn Home() -> impl IntoView {
     let stock = create_rw_signal(1);
-    let action = create_action(|_input: &()| async {
-        let chart = Chart::new()
-            .title(Title::new().text("Demo: Leptos + Charming"))
-            .x_axis(
-                Axis::new()
-                    .type_(AxisType::Category)
-                    .data(vec!["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]),
-            )
-            .y_axis(Axis::new().type_(AxisType::Value))
-            .series(Line::new().data(vec![150, 230, 224, 218, 135, 147, 260]));
-
-        let renderer = WasmRenderer::new(600, 400);
+    let paths = vec![
+        "data/data_index.csv".to_string(),
+        "data/data_maotai.csv".to_string(),
+        "data/data_mengjie.csv".to_string(),
+    ];
+    let path = move || paths[stock.get()].clone();
+    let resource = create_resource(path, |path| async move {
+        // 读取并计算数据
+        let data = compute_data(path).await.unwrap();
+        // 生成图表
+        let chart = chart(data);
+        // 渲染图表
+        let renderer = WasmRenderer::new(900, 600);
         renderer.render("chart", &chart).unwrap();
     });
-    create_effect(move |_| {
-        if stock.get() == 0 {
-            action.dispatch(());
-        };
-    });
-    // 获取数据
+
+    // 创建新线程
+    /*     let handle = thread::spawn(move || {
+        let resource = create_resource(path, |path| async move {
+            // 读取并计算数据
+            let data = compute_data(path).await.unwrap();
+            // 生成图表
+            let chart = chart(data);
+            // 渲染图表
+            let renderer = WasmRenderer::new(900, 600);
+            renderer.render("chart", &chart).unwrap();
+        });
+    }); */
 
     view! {
-    <header>
-      <h1>"Investment Simulation Plots"</h1>
-      <p>"CSI300 Index, Maotai and Mengjie"</p>
-    </header>
-    <aside>
-      <button
-        on:click={move |_| stock.set(0)}
-        class={move || if stock.get() == 0 { "active" } else { "" }}
-      >"Index"</button>
-      <button
-        on:click={move |_| stock.set(1)}
-        class={move || if stock.get() == 1 { "active" } else { "" }}
-      >"Maotai"</button>
-      <button
-        on:click={move |_| stock.set(2)}
-        class={move || if stock.get() == 2 { "active" } else { "" }}
-      >"Mengjie"</button>
-    </aside>
-    <main id="figures">
-      <figure>
-        <div class="plot"
-          id="chart"
-        >"收益对持有期曲线图"</div>
-        <figcaption>"低水平组🙁（正确率0.45）"</figcaption>
-      </figure>
-      <figure>
-        <div class="plot">"收益对持有期曲线图"</div>
-        <figcaption>"中水平组😐（正确率0.5）"</figcaption>
-      </figure>
-      <figure>
-        <div class="plot">"收益对持有期曲线图"</div>
-        <figcaption>"高水平组😄（正确率0.55）"</figcaption>
-      </figure>
-    </main>
-    <footer>
-      <p>
-        Made by <strong>"Cavendish"</strong>. The source code is on
-        <a href="https://github.com/Pelapis/invest-simulation">GitHub</a>.
-      </p>
-      // 链接到贪吃蛇小游戏
-      <a href="/snake">"贪吃蛇🐍小游戏"</a>
-    </footer>
-    <script type="module" src="index.js"></script>
-    }
+        <header>
+          <h1>"Investment Simulation Plots"</h1>
+          <p>"CSI300 Index, Maotai and Mengjie"</p>
+        </header>
+        <aside>
+          <button
+            on:click={move |_| stock.set(0)}
+            class={move || if stock.get() == 0 { "active" } else { "" }}
+          >"Index"</button>
+          <button
+            on:click={move |_| stock.set(1)}
+            class={move || if stock.get() == 1 { "active" } else { "" }}
+          >"Maotai"</button>
+          <button
+            on:click={move |_| stock.set(2)}
+            class={move || if stock.get() == 2 { "active" } else { "" }}
+          >"Mengjie"</button>
+        </aside>
+        <main id="figures">
+    /*       <figure>
+            <div class="plot">"收益对持有期曲线图"</div>
+            <figcaption>"低水平组🙁（正确率0.45）"</figcaption>
+          </figure> */
+          <figure>
+            <div class="plot" id="chart">{
+                match resource.get() {
+                    None => "正在计算数据...",
+                    Some(_) => "收益对持有期曲线图",
+                }
+            }</div>
+            <figcaption>"中水平组😐（正确率0.5）"</figcaption>
+          </figure>
+    /*       <figure>
+            <div class="plot">"收益对持有期曲线图"</div>
+            <figcaption>"高水平组😄（正确率0.55）"</figcaption>
+          </figure> */
+        </main>
+        <footer>
+          <p>
+            Made by <strong>"Cavendish"</strong>. The source code is on
+            <a href="https://github.com/Pelapis/invest-simulation">GitHub</a>.
+          </p>
+          // 链接到贪吃蛇小游戏
+          <a href="/snake">"贪吃蛇🐍小游戏"</a>
+        </footer>
+        <script type="module" src="index.js"></script>
+        }
 }
 
 #[component]
@@ -110,7 +124,7 @@ fn Snake() -> impl IntoView {
     }
 }
 
-pub fn chart(data: Vec<DataItem>) -> Chart {
+fn chart(data: Vec<DataItem>) -> Chart {
     let base = -data
         .iter()
         .fold(f64::INFINITY, |min, val| f64::floor(f64::min(min, val.l)));
@@ -187,7 +201,7 @@ pub fn chart(data: Vec<DataItem>) -> Chart {
               .show_symbol(false))
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 struct DataItem {
     date: String,
     value: f64,
@@ -195,18 +209,18 @@ struct DataItem {
     u: f64,
 }
 
-fn compute_data() -> Vec<DataItem> {
-    let text: &str = "";
+async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error::Error>> {
     let investor_count: usize = 100;
     let trading_cost: f64 = 0.001;
     let level: f64 = 0.5;
-    let participation: f64 = 0.45;
+    let participation: f64 = 0.5;
     let days = vec![1, 2, 3, 5, 10, 21, 63, 250, 1250, 2500];
     let day_names = vec![
         "1天", "2天", "3天", "1周", "2周", "1月", "1季度", "1年", "5年", "10年",
     ];
 
     // 数据预处理
+    let text = reqwest::get(&path).await?.text().await?; // 读取数据
     let return_vector: Vec<f64> = text
         .lines()
         .filter_map(|line| line.split(',').nth(2)?.parse::<f64>().ok())
@@ -264,5 +278,5 @@ fn compute_data() -> Vec<DataItem> {
         data[i].date = day_names[i].to_string();
     }
 
-    data
+    Ok(data)
 }
