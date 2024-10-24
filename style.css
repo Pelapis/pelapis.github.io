@@ -101,3 +101,7 @@ a {
     color: burlywood;
     text-decoration: none;
 }
+
+h3, h6 {
+    text-align: center;
+}
