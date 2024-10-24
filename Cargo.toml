@@ -11,4 +11,4 @@ leptos = { version = "0.6.15", features = ["csr"] }
 leptos_router = { version = "0.6.15", features = ["csr"] }
 rand = "0.8.5"
 serde = "1.0.213"
-web-sys = { version = "0.3.72", features = ["HtmlCanvasElement", "CanvasRenderingContext2d"] }
+web-sys = { version = "0.3.72", features = ["HtmlCanvasElement", "CanvasRenderingContext2d", "HtmlElement"] }
