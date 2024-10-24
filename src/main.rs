@@ -11,6 +11,7 @@ use charming::{
     series::Line,
     Chart, WasmRenderer,
 };
+use gloo::net::http::Request;
 use leptos::*;
 use leptos_router::*;
 use rand::random;
@@ -34,14 +35,14 @@ fn App() -> impl IntoView {
 
 #[component]
 fn Home() -> impl IntoView {
-    let stock = create_rw_signal(1);
+    let stock = create_rw_signal(0);
     let paths = vec![
         "data/data_index.csv".to_string(),
         "data/data_maotai.csv".to_string(),
         "data/data_mengjie.csv".to_string(),
     ];
     let path = move || paths[stock.get()].clone();
-    let resource = create_resource(path, |path| async move {
+    let resource = create_resource(path.clone(), |path| async move {
         // 读取并计算数据
         let data = compute_data(path).await.unwrap();
         // 生成图表
@@ -50,6 +51,11 @@ fn Home() -> impl IntoView {
         let renderer = WasmRenderer::new(900, 600);
         renderer.render("chart", &chart).unwrap();
     });
+
+    /* let resource = create_resource(path.clone(), |path| async move {
+        let text = request_data(path).await;
+        return text;
+    }); */
 
     // 创建新线程
     /*     let handle = thread::spawn(move || {
@@ -89,10 +95,10 @@ fn Home() -> impl IntoView {
             <figcaption>"低水平组🙁（正确率0.45）"</figcaption>
           </figure> */
           <figure>
-            <div class="plot" id="chart">{
+            <div class="plot" id="chart">{ move ||
                 match resource.get() {
-                    None => "正在计算数据...",
-                    Some(_) => "收益对持有期曲线图",
+                    None => view! { "正在计算数据..." },
+                    Some(_) => view! { "正在渲染图表..." },
                 }
             }</div>
             <figcaption>"中水平组😐（正确率0.5）"</figcaption>
@@ -166,21 +172,17 @@ fn chart(data: Vec<DataItem>) -> Chart {
       )
       .y_axis(
           Axis::new()
-              .axis_label(AxisLabel::new().formatter(
-                  Formatter::Function(format!("function (val) {{ return (val - {}) * 100 + '%'; }}", base).into()))
-              )
+              .axis_label(AxisLabel::new())
               .axis_pointer(
                   AxisPointer::new().label(
-                      Label::new().formatter(
-                          Formatter::Function(format!("function (params) {{ return ((params.value - {}) * 100).toFixed(1) + '%'; }}", base).into())
-                      )
+                      Label::new()
                   )
               ).split_number(3)
       )
       .series(
           Line::new()
               .name("L")
-              .data(data.iter().map(|x| x.l + base).collect())
+              .data(data.iter().map(|x| x.l).collect())
               .line_style(LineStyle::new().opacity(0))
               .stack("confidence-band")
               .symbol(Symbol::None)
@@ -196,7 +198,7 @@ fn chart(data: Vec<DataItem>) -> Chart {
       )
       .series(
           Line::new()
-              .data(data.iter().map(|x| x.value + base).collect())
+              .data(data.iter().map(|x| x.value).collect())
               .item_style(ItemStyle::new().color("#333"))
               .show_symbol(false))
 }
@@ -207,6 +209,16 @@ struct DataItem {
     value: f64,
     l: f64,
     u: f64,
+}
+
+async fn request_data(path: String) -> String {
+    Request::get(&path)
+        .send()
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap()
 }
 
 async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error::Error>> {
@@ -220,7 +232,7 @@ async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error:
     ];
 
     // 数据预处理
-    let text = reqwest::get(&path).await?.text().await?; // 读取数据
+    let text = request_data(path).await;
     let return_vector: Vec<f64> = text
         .lines()
         .filter_map(|line| line.split(',').nth(2)?.parse::<f64>().ok())
