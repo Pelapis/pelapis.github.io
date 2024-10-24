@@ -123,23 +123,29 @@ pub fn Snake() -> impl IntoView {
         <div
             on: keydown=move |event| {
                 let key = event.key();
-                match key.as_str() {
-                    "ArrowUp" | "w" => current_direction.set(Directions::Up),
-                    "ArrowDown" | "s" => current_direction.set(Directions::Down),
-                    "ArrowLeft" | "a" => current_direction.set(Directions::Left),
-                    "ArrowRight" | "d" => current_direction.set(Directions::Right),
-                    _ => {}
+                let direction = match key.as_str() {
+                    "ArrowUp" | "w" => Directions::Up,
+                    "ArrowDown" | "s" => Directions::Down,
+                    "ArrowLeft" | "a" => Directions::Left,
+                    "ArrowRight" | "d" => Directions::Right,
+                    _ => {return;}
                 };
+                if direction != current_direction.get() && direction != current_direction.get().reverse()  {
+                    current_direction.set(direction);
+                }
             }
             on: click=move |event| {
                 let click_x = event.offset_x() as f64;
                 let click_y = event.offset_y() as f64;
                 // 写出对角线方程，判断点击的位置
-                match (click_y > click_x, click_y > HEIGHT as f64 - click_x) {
-                    (false, false) => current_direction.set(Directions::Up),
-                    (true, false) => current_direction.set(Directions::Left),
-                    (true, true) => current_direction.set(Directions::Down),
-                    (false, true) => current_direction.set(Directions::Right),
+                let direction = match (click_y > click_x, click_y > HEIGHT as f64 - click_x) {
+                    (false, false) => Directions::Up,
+                    (true, false) => Directions::Left,
+                    (true, true) => Directions::Down,
+                    (false, true) => Directions::Right,
+                };
+                if direction != current_direction.get() && direction != current_direction.get().reverse()  {
+                    current_direction.set(direction);
                 }
             }
         >
@@ -166,6 +172,18 @@ enum Directions {
     Left,
     Right,
     None,
+}
+
+impl Directions {
+    fn reverse(&self) -> Directions {
+        match self {
+            Directions::Up => Directions::Down,
+            Directions::Down => Directions::Up,
+            Directions::Left => Directions::Right,
+            Directions::Right => Directions::Left,
+            Directions::None => Directions::None,
+        }
+    }
 }
 
 #[derive(Clone)]
