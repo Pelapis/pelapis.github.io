@@ -174,7 +174,7 @@ async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error:
     let participation: f64 = 0.5;
     let days = vec![1, 2, 3, 5, 10, 21, 63, 250, 1250, 2500];
     let day_names = vec![
-        "1天", "2天", "3天", "1周", "2周", "1月", "1季度", "1年", "5年", "10年",
+        "1天", "2天", "3天", "1周", "2周", "1月", "1季", "1年", "5年", "10年",
     ];
 
     // 数据预处理
