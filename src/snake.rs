@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use ev::keydown;
 use html::canvas;
 use leptos::*;
 use rand::random;
@@ -118,22 +119,27 @@ pub fn Snake() -> impl IntoView {
         }
     });
 
+    window_event_listener(keydown, move |event| {
+        let key = event.key();
+        let direction = match key.as_str() {
+            "ArrowUp" | "w" => Directions::Up,
+            "ArrowDown" | "s" => Directions::Down,
+            "ArrowLeft" | "a" => Directions::Left,
+            "ArrowRight" | "d" => Directions::Right,
+            _ => return,
+        };
+        if direction != current_direction.get() && direction != current_direction.get().reverse() {
+            current_direction.set(direction);
+        }
+    });
+
     // 返回HTML视图
     view! {
-        <div
-            on: keydown=move |event| {
-                let key = event.key();
-                let direction = match key.as_str() {
-                    "ArrowUp" | "w" => Directions::Up,
-                    "ArrowDown" | "s" => Directions::Down,
-                    "ArrowLeft" | "a" => Directions::Left,
-                    "ArrowRight" | "d" => Directions::Right,
-                    _ => {return;}
-                };
-                if direction != current_direction.get() && direction != current_direction.get().reverse()  {
-                    current_direction.set(direction);
-                }
-            }
+        <header>
+            <h1>"贪吃蛇"</h1>
+        </header>
+        <h1> { move || format!("{:?}", pressed_key.get()) } </h1>
+        <main
             on: click=move |event| {
                 let click_x = event.offset_x() as f64;
                 let click_y = event.offset_y() as f64;
@@ -149,19 +155,13 @@ pub fn Snake() -> impl IntoView {
                 }
             }
         >
-            <header>
-                <h1>"贪吃蛇"</h1>
-            </header>
-            <h1> { move || format!("{:?}", pressed_key.get()) } </h1>
-            <main>
-                {canvas}
-            </main>
-            <h6>"手机：点击画面上下左右"</h6>
-            <h6>"电脑：上下左右键或wasd键"</h6>
-            <footer>
-                "Made by Cavendish. Back to " <a href="/">"Home"</a> "."
-            </footer>
-        </div>
+            {canvas}
+        </main>
+        <h6>"手机：点击画面上下左右"</h6>
+        <h6>"电脑：上下左右键或wasd键"</h6>
+        <footer>
+            "Made by Cavendish. Back to " <a href="/">"Home"</a> "."
+        </footer>
     }
 }
 
