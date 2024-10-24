@@ -1,6 +1,8 @@
 use charming::{
     component::{Axis, Grid, Title},
-    element::{AreaStyle, AxisLabel, AxisPointer, AxisType, ItemStyle, Label, LineStyle, Symbol},
+    element::{
+        AreaStyle, AxisLabel, AxisPointer, AxisType, ItemStyle, Label, LineStyle, Symbol,
+    },
     series::Line,
     Chart, WasmRenderer,
 };
@@ -98,8 +100,13 @@ fn Snake() -> impl IntoView {
 }
 
 fn chart(data: Vec<DataItem>) -> Chart {
+    /* let base = -data
+        .iter()
+        .fold(f64::INFINITY, |min, val| f64::floor(f64::min(min, val.l))); */
+    let base = 0.;
+
     Chart::new()
-        .title(Title::new().text("收益对持有期曲线图").left("center"))
+        .title(Title::new().text("收益-持有期曲线图").left("center"))
         .grid(
             Grid::new()
                 .left("3%")
@@ -122,7 +129,7 @@ fn chart(data: Vec<DataItem>) -> Chart {
         .series(
             Line::new()
                 .name("L")
-                .data(data.iter().map(|x| x.l).collect())
+                .data(data.iter().map(|x| x.l + base).collect())
                 .line_style(LineStyle::new().opacity(0))
                 .stack("confidence-band")
                 .symbol(Symbol::None),
@@ -138,7 +145,7 @@ fn chart(data: Vec<DataItem>) -> Chart {
         )
         .series(
             Line::new()
-                .data(data.iter().map(|x| x.value).collect())
+                .data(data.iter().map(|x| x.value + base).collect())
                 .item_style(ItemStyle::new().color("#333"))
                 .show_symbol(false),
         )
@@ -210,7 +217,7 @@ async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error:
                         acc *= this_return * (1. - trading_cost)
                     }
                     acc
-                }) - 1.
+                })
             })
             .collect();
 
