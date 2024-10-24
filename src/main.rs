@@ -1,8 +1,6 @@
 use charming::{
     component::{Axis, Grid, Title},
-    element::{
-        AreaStyle, AxisLabel, AxisPointer, AxisType, ItemStyle, Label, LineStyle, Symbol,
-    },
+    element::{AreaStyle, AxisLabel, AxisPointer, AxisType, ItemStyle, Label, LineStyle, Symbol},
     series::Line,
     Chart, WasmRenderer,
 };
@@ -101,8 +99,8 @@ fn Snake() -> impl IntoView {
 
 fn chart(data: Vec<DataItem>) -> Chart {
     /* let base = -data
-        .iter()
-        .fold(f64::INFINITY, |min, val| f64::floor(f64::min(min, val.l))); */
+    .iter()
+    .fold(f64::INFINITY, |min, val| f64::floor(f64::min(min, val.l))); */
     let base = 0.;
 
     Chart::new()
