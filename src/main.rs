@@ -1,3 +1,5 @@
+mod snake;
+
 use charming::{
     component::{Axis, Grid, Title},
     element::{AreaStyle, AxisLabel, AxisPointer, AxisType, ItemStyle, Label, LineStyle, Symbol},
@@ -9,6 +11,7 @@ use leptos::*;
 use leptos_router::*;
 use rand::random;
 use serde::{Deserialize, Serialize};
+use snake::Snake;
 
 fn main() {
     mount_to_body(move || view! { <App /> });
@@ -84,16 +87,6 @@ fn Home() -> impl IntoView {
       <a href="/snake">"贪吃蛇🐍小游戏"</a>
     </footer>
     <script type="module" src="index.js"></script>
-    }
-}
-
-#[component]
-fn Snake() -> impl IntoView {
-    view! {
-        <div>
-            <h1>{"Snake"}</h1>
-            <a href="/">{"Home"}</a>
-        </div>
     }
 }
 
@@ -207,12 +200,12 @@ async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error:
         // 计算各投资者的最终收益率
         let mut investor_returns: Vec<f64> = (0..investor_count)
             .map(|_| {
-                adjusted_returns.iter().fold(1., |mut acc, &this_return| {
+                adjusted_returns.iter().fold(1., |acc, &this_return| {
                     let is_growing = this_return > 1.;
                     let will_win = level > random::<f64>();
                     let will_participate = participation > random::<f64>();
                     if (is_growing == will_win) && will_participate {
-                        acc *= this_return * (1. - trading_cost)
+                        return acc * this_return * (1. - trading_cost)
                     }
                     acc
                 })

@@ -1,0 +1,285 @@
+use std::time::Duration;
+
+use html::canvas;
+use leptos::*;
+use wasm_bindgen::JsCast;
+
+// 设定画布的宽高，以及网格的行列数，网格的颜色
+const WIDTH: i32 = 500;
+const HEIGHT: i32 = 500;
+const CELL_NUMBER: i32 = 25;
+const GRID_COLOR: &str = "#CCCCCC";
+
+#[component]
+pub fn Snake() -> impl IntoView {
+    let pressed_key = create_rw_signal(Direction::None);
+    let canvas = canvas();
+    let ctx = canvas.get_context("2d").unwrap().unwrap().dyn_into().expect("转换为canvas context2d失败");
+
+    // 设定一个定时器，每隔一段时间更新一次世界
+    set_interval(
+        move || {
+            match pressed_key.get() {
+                Direction::Up | Direction::Down => match snake.head_direction {
+                    Direction::Left | Direction::Right => snake.head_direction = pressed_key.get(),
+                    _ => {}
+                },
+                Direction::Left | Direction::Right => match snake.head_direction {
+                    Direction::Up | Direction::Down => snake.head_direction = pressed_key.get(),
+                    _ => {}
+                },
+                Direction::None => {}
+            };
+            update_world(&mut snake, &mut world, &mut food);
+            render_world(&ctx, &world);
+            pressed_key.set(Direction::None);
+        },
+        Duration::from_millis(400),
+    );
+
+    view! {
+        <div
+            on: keydown=move |event| {
+                let key = event.key();
+                match key.as_str() {
+                    "ArrowUp" | "w" => pressed_key.set(Direction::Up),
+                    "ArrowDown" | "s" => pressed_key.set(Direction::Down),
+                    "ArrowLeft" | "a" => pressed_key.set(Direction::Left),
+                    "ArrowRight" | "d" => pressed_key.set(Direction::Right),
+                    _ => {}
+                };
+            }
+            on: click=move |event| {
+                let touch = event;
+                let client_x = touch.client_x() as f64;
+                let client_y = touch.client_y() as f64;
+                let canvas_rect = canvas.get_bounding_client_rect();
+                // 写出对角线方程，判断点击的位置
+                // (x, y) (right, bottom)
+                // y - y0 / x - x0 = height / width
+                // y = height / width * (x - x0) + y0
+                // (right, y) (x, bottom)
+                // y - y0) / (x - right) = - height / width
+                // y = - height / width * (x - right) + y0
+                match (client_x, client_y) {
+                    (x, y)
+                        if y <= canvas.height() as f64 / canvas.width() as f64
+                            * (x - canvas_rect.x())
+                            + canvas_rect.y() =>
+                    {
+                        match (client_x, client_y) {
+                            (x, y)
+                                if y <= canvas.height() as f64 / canvas.width() as f64
+                                    * (canvas_rect.right() - x)
+                                    + canvas_rect.y() =>
+                            {
+                                pressed_key.set(Direction::Up)
+                            }
+                            (x, y)
+                                if y > canvas.height() as f64 / canvas.width() as f64
+                                    * (canvas_rect.right() - x)
+                                    + canvas_rect.y() =>
+                            {
+                                pressed_key.set(Direction::Right)
+                            }
+                            _ => {}
+                        }
+                    }
+                    (x, y)
+                        if y > canvas.height() as f64 / canvas.width() as f64
+                            * (x - canvas_rect.x())
+                            + canvas_rect.y() =>
+                    {
+                        match (client_x, client_y) {
+                            (x, y)
+                                if y <= canvas.height() as f64 / canvas.width() as f64
+                                    * (canvas_rect.right() - x)
+                                    + canvas_rect.y() =>
+                            {
+                                pressed_key.set(Direction::Left)
+                            }
+                            (x, y)
+                                if y > canvas.height() as f64 / canvas.width() as f64
+                                    * (canvas_rect.right() - x)
+                                    + canvas_rect.y() =>
+                            {
+                                pressed_key.set(Direction::Down)
+                            }
+                            _ => {}
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        >
+            <header>
+                <h1>"贪吃蛇"</h1>
+            </header>
+            <h1> { move || format!("{:?}", pressed_key.get()) } </h1>
+            <main>
+                {the_canvas}
+                <canvas width={format!("{}", WIDTH)} height={format!("{}", HEIGHT)} />
+            </main>
+            <caption>"手机：点击画面上下左右"</caption>
+            <caption>"电脑：上下左右键或wasd键"</caption>
+            <footer>
+                "Made by Cavendish."
+            </footer>
+            <a href="/">{"Home"}</a>
+        </div>
+    }
+}
+
+fn _main() {
+
+    // 初始化世界
+    let mut world = vec![false; CELL_NUMBER.pow(2) as usize];
+    // 初始化蛇
+    let mut snake = Snake {
+        body: vec![
+            (CELL_NUMBER * (CELL_NUMBER - 3) + CELL_NUMBER / 2),
+            (CELL_NUMBER * (CELL_NUMBER - 2) + CELL_NUMBER / 2),
+            (CELL_NUMBER * (CELL_NUMBER - 1) + CELL_NUMBER / 2),
+        ],
+        head_direction: Direction::Up,
+    };
+    for &i in snake.body.iter() {
+        world[i as usize] = true;
+    }
+    // 初始化食物
+    let food_number = 5;
+    let mut food: Vec<i32> = (0..food_number).map(|_| gen_one_food(&world)).collect();
+    for &i in food.iter() {
+        world[i as usize] = true;
+    }
+    // 渲染世界
+    render_world(&ctx, &world);
+}
+
+// 画出网格
+fn draw_grid(ctx: &web_sys::CanvasRenderingContext2d, grid_color: &str, cell_number: i32) {
+    ctx.begin_path();
+    ctx.set_stroke_style(&JsValue::from(grid_color));
+
+    // 画出竖线
+    for i in (0..=cell_number).map(|i| i * WIDTH as i32 / cell_number) {
+        ctx.move_to(i as f64, 0.0);
+        ctx.line_to(i as f64, HEIGHT as f64);
+    }
+    // 画出横线
+    for i in (0..=cell_number).map(|i| i * HEIGHT as i32 / cell_number) {
+        ctx.move_to(0.0, i as f64);
+        ctx.line_to(WIDTH as f64, i as f64);
+    }
+
+    ctx.stroke();
+}
+
+// 渲染世界
+fn draw_cells(ctx: &web_sys::CanvasRenderingContext2d, world: &[bool], cell_number: i32) {
+    for y in 0..cell_number {
+        for x in 0..cell_number {
+            if world[(y * cell_number + x) as usize] {
+                ctx.fill_rect(
+                    (x * WIDTH / cell_number) as f64,
+                    (y * HEIGHT / cell_number) as f64,
+                    (WIDTH / cell_number) as f64,
+                    (HEIGHT / cell_number) as f64,
+                );
+            }
+        }
+    }
+}
+
+// 渲染世界
+fn render_world(ctx: &web_sys::CanvasRenderingContext2d, world: &Vec<bool>) {
+    // 清空画布
+    ctx.clear_rect(0.0, 0.0, WIDTH as f64, HEIGHT as f64);
+    // 画出网格
+    draw_grid(&ctx, GRID_COLOR, CELL_NUMBER);
+    // 渲染世界
+    draw_cells(&ctx, &world, CELL_NUMBER);
+}
+
+// 更新世界
+fn update_world(snake: &mut Snake, world: &mut Vec<bool>, food: &mut Vec<i32>) {
+    // 更新蛇
+    snake.update_snake(world, food);
+    // 重新生成世界
+    for i in world.iter_mut() {
+        *i = false;
+    }
+    for &i in snake.body.iter() {
+        world[i as usize] = true;
+    }
+    for &i in food.iter() {
+        world[i as usize] = true;
+    }
+}
+
+// 生成一个食物
+fn gen_one_food(world: &Vec<bool>) -> i32 {
+    match thread_rng().gen_range(0..CELL_NUMBER.pow(2)) {
+        x if world[x as usize] => gen_one_food(world),
+        x => x,
+    }
+}
+
+
+// 定义蛇结构
+struct Snake {
+    body: Vec<i32>,
+    head_direction: Direction,
+}
+
+impl Snake {
+    fn update_snake(&mut self, world: &Vec<bool>, food: &mut Vec<i32>) {
+        let new_head = Self::update_body(&self.body[0], &self.head_direction);
+        match world[new_head as usize] {
+            false => {
+                self.body.pop();
+                self.body.insert(0, new_head);
+            }
+            true => {
+                for i in food.iter_mut() {
+                    if i == &new_head {
+                        *i = gen_one_food(&world);
+                        self.body.insert(0, new_head);
+                        return;
+                    }
+                }
+                // 碰到自己，游戏结束
+                web_sys::window()
+                    .unwrap()
+                    .alert_with_message(
+                        format!("游戏结束！您的得分是：{}！", self.body.len()).as_str(),
+                    )
+                    .unwrap();
+                // 刷新页面
+                web_sys::window().unwrap().location().reload().unwrap();
+            }
+        }
+    }
+
+    fn update_body(&head: &i32, &direction: &Direction) -> i32 {
+        match direction {
+            Direction::Up => match head / CELL_NUMBER {
+                x if x == 0 => head - CELL_NUMBER + CELL_NUMBER.pow(2),
+                _ => head - CELL_NUMBER,
+            },
+            Direction::Down => match head / CELL_NUMBER {
+                x if x == CELL_NUMBER - 1 => head + CELL_NUMBER - CELL_NUMBER.pow(2),
+                _ => head + CELL_NUMBER,
+            },
+            Direction::Left => match head % CELL_NUMBER {
+                0 => head - 1 + CELL_NUMBER,
+                _ => head - 1,
+            },
+            Direction::Right => match head % CELL_NUMBER {
+                x if x == CELL_NUMBER - 1 => head + 1 - CELL_NUMBER,
+                _ => head + 1,
+            },
+            Direction::None => head,
+        }
+    }
+}

@@ -1073,6 +1073,7 @@ dependencies = [
  "leptos_router",
  "rand",
  "serde",
+ "web-sys",
 ]
 
 [[package]]
