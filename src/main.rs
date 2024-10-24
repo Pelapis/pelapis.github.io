@@ -1,10 +1,5 @@
-use std::thread;
-
 use charming::component::Grid;
-use charming::element::{
-    AreaStyle, AxisLabel, AxisPointer, AxisPointerType, Formatter, ItemStyle, Label, LineStyle,
-    Symbol, Tooltip, Trigger,
-};
+use charming::element::{AreaStyle, AxisLabel, AxisPointer, ItemStyle, Label, LineStyle, Symbol};
 use charming::{
     component::{Axis, Title},
     element::AxisType,
@@ -52,72 +47,46 @@ fn Home() -> impl IntoView {
         renderer.render("chart", &chart).unwrap();
     });
 
-    /* let resource = create_resource(path.clone(), |path| async move {
-        let text = request_data(path).await;
-        return text;
-    }); */
-
-    // 创建新线程
-    /*     let handle = thread::spawn(move || {
-        let resource = create_resource(path, |path| async move {
-            // 读取并计算数据
-            let data = compute_data(path).await.unwrap();
-            // 生成图表
-            let chart = chart(data);
-            // 渲染图表
-            let renderer = WasmRenderer::new(900, 600);
-            renderer.render("chart", &chart).unwrap();
-        });
-    }); */
-
     view! {
-        <header>
-          <h1>"Investment Simulation Plots"</h1>
-          <p>"CSI300 Index, Maotai and Mengjie"</p>
-        </header>
-        <aside>
-          <button
-            on:click={move |_| stock.set(0)}
-            class={move || if stock.get() == 0 { "active" } else { "" }}
-          >"Index"</button>
-          <button
-            on:click={move |_| stock.set(1)}
-            class={move || if stock.get() == 1 { "active" } else { "" }}
-          >"Maotai"</button>
-          <button
-            on:click={move |_| stock.set(2)}
-            class={move || if stock.get() == 2 { "active" } else { "" }}
-          >"Mengjie"</button>
-        </aside>
-        <main id="figures">
-    /*       <figure>
-            <div class="plot">"收益对持有期曲线图"</div>
-            <figcaption>"低水平组🙁（正确率0.45）"</figcaption>
-          </figure> */
-          <figure>
-            <div class="plot" id="chart">{ move ||
-                match resource.get() {
-                    None => view! { "正在计算数据..." },
-                    Some(_) => view! { "正在渲染图表..." },
-                }
-            }</div>
-            <figcaption>"中水平组😐（正确率0.5）"</figcaption>
-          </figure>
-    /*       <figure>
-            <div class="plot">"收益对持有期曲线图"</div>
-            <figcaption>"高水平组😄（正确率0.55）"</figcaption>
-          </figure> */
-        </main>
-        <footer>
-          <p>
-            Made by <strong>"Cavendish"</strong>. The source code is on
-            <a href="https://github.com/Pelapis/invest-simulation">GitHub</a>.
-          </p>
-          // 链接到贪吃蛇小游戏
-          <a href="/snake">"贪吃蛇🐍小游戏"</a>
-        </footer>
-        <script type="module" src="index.js"></script>
-        }
+    <header>
+      <h1>"Investment Simulation Plots"</h1>
+      <p>"CSI300 Index, Maotai and Mengjie"</p>
+    </header>
+    <aside>
+      <button
+        on:click={move |_| stock.set(0)}
+        class={move || if stock.get() == 0 { "active" } else { "" }}
+      >"Index"</button>
+      <button
+        on:click={move |_| stock.set(1)}
+        class={move || if stock.get() == 1 { "active" } else { "" }}
+      >"Maotai"</button>
+      <button
+        on:click={move |_| stock.set(2)}
+        class={move || if stock.get() == 2 { "active" } else { "" }}
+      >"Mengjie"</button>
+    </aside>
+    <main id="figures">
+      <figure>
+        <div class="plot" id="chart">{ move ||
+            match resource.get() {
+                None => view! { "正在计算数据..." },
+                Some(_) => view! { "正在渲染图表..." },
+            }
+        }</div>
+        <figcaption>"中水平组😐（正确率0.5）"</figcaption>
+      </figure>
+    </main>
+    <footer>
+      <p>
+        Made by <strong>"Cavendish"</strong>. The source code is on
+        <a href="https://github.com/Pelapis/invest-simulation">GitHub</a>.
+      </p>
+      // 链接到贪吃蛇小游戏
+      <a href="/snake">"贪吃蛇🐍小游戏"</a>
+    </footer>
+    <script type="module" src="index.js"></script>
+    }
 }
 
 #[component]
@@ -177,7 +146,7 @@ fn chart(data: Vec<DataItem>) -> Chart {
         )
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 struct DataItem {
     date: String,
     value: f64,
@@ -224,35 +193,29 @@ async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error:
 
     for (i, hold_day) in days.iter().enumerate() {
         let hold_count = return_vector.len().div_ceil(*hold_day);
-        let adjusted_return: Vec<f64> = (0..hold_count)
-            .map(|i| {
-                return_vector[i * hold_day..return_vector.len().min((i + 1) * hold_day)]
+        let adjusted_returns: Vec<f64> = (0..hold_count)
+            .map(|j| {
+                return_vector[j * hold_day..return_vector.len().min((j + 1) * hold_day)]
                     .iter()
                     .product()
             })
             .collect();
-        // 生成需要的随机数
-        let random_matrix: Vec<Vec<f64>> = (0..investor_count)
-            .map(|_| (0..hold_count).map(|_| random::<f64>()).collect())
-            .collect();
+
         // 计算各投资者的最终收益率
         let mut investor_returns: Vec<f64> = (0..investor_count)
-            .map(|i| {
-                adjusted_return
-                    .iter()
-                    .zip(random_matrix[i].iter())
-                    .fold(1., |acc, (&e, &r)| {
-                        let growing = e > 1.;
-                        let win = r < level;
-                        let participating = r < participation;
-                        if growing == win && participating {
-                            acc * e * (1. - trading_cost)
-                        } else {
-                            acc
-                        }
-                    })
+            .map(|_| {
+                adjusted_returns.iter().fold(1., |mut acc, &this_return| {
+                    let is_growing = this_return > 1.;
+                    let will_win = level > random::<f64>();
+                    let will_participate = participation > random::<f64>();
+                    if (is_growing == will_win) && will_participate {
+                        acc *= this_return * (1. - trading_cost)
+                    }
+                    acc
+                }) - 1.
             })
             .collect();
+
         // 计算统计学特征，只保留一个数值
         let mean = investor_returns.iter().sum::<f64>() / investor_count as f64;
         investor_returns.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -264,5 +227,6 @@ async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error:
         data[i].date = day_names[i].to_string();
     }
 
+    gloo::console::log!(format!("{:?}", data));
     Ok(data)
 }
