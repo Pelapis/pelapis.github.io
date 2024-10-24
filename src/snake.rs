@@ -1,5 +1,4 @@
 use std::time::Duration;
-
 use ev::keydown;
 use gloo::dialogs::alert;
 use html::canvas;
