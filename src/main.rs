@@ -1,8 +1,6 @@
-use charming::component::Grid;
-use charming::element::{AreaStyle, AxisLabel, AxisPointer, ItemStyle, Label, LineStyle, Symbol};
 use charming::{
-    component::{Axis, Title},
-    element::AxisType,
+    component::{Axis, Grid, Title},
+    element::{AreaStyle, AxisLabel, AxisPointer, AxisType, ItemStyle, Label, LineStyle, Symbol},
     series::Line,
     Chart, WasmRenderer,
 };
