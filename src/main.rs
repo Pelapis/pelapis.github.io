@@ -108,7 +108,7 @@ fn Home() -> impl IntoView {
     </main>
     <footer>
       <p>
-        Made by <strong>"Cavendish"</strong>. The source code is on
+        Made by <strong>"Cavendish"</strong>. The source code is on 
         <a href="https://github.com/Pelapis/invest-simulation">GitHub</a>.
       </p>
       // 链接到贪吃蛇小游戏
