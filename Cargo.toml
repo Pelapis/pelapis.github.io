@@ -17,4 +17,7 @@ web-sys = { version = "0.3.72", features = [
     "HtmlCanvasElement",
     "CanvasRenderingContext2d",
     "HtmlElement",
+    "TouchEvent",
+    "TouchList",
+    "Touch",
 ] }

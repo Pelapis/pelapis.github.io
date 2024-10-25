@@ -1,16 +1,16 @@
-use std::time::Duration;
 use ev::keydown;
 use gloo::dialogs::alert;
 use html::canvas;
 use leptos::*;
 use rand::random;
+use std::time::Duration;
 use wasm_bindgen::JsCast;
 use web_sys::CanvasRenderingContext2d;
 
 // 设定画布的宽高，以及网格的行列数
-const WIDTH: u32 = 500;
-const HEIGHT: u32 = 500;
-const CELL_COUNT: usize = 25;
+const WIDTH: u32 = 380;
+const HEIGHT: u32 = WIDTH;
+const CELL_COUNT: usize = 17;
 
 #[component]
 pub fn Snake() -> impl IntoView {
@@ -75,6 +75,7 @@ pub fn Snake() -> impl IntoView {
     let canvas = canvas();
     canvas.set_width(WIDTH);
     canvas.set_height(HEIGHT);
+    let canvas_clone = canvas.clone();
     let ctx: CanvasRenderingContext2d = canvas
         .get_context("2d")
         .unwrap()
@@ -144,14 +145,32 @@ pub fn Snake() -> impl IntoView {
         <header>
             <h1>"贪吃蛇"</h1>
         </header>
-        <h3>"得分：" {move || snake.get().len()}</h3>
+        <h3>"得分：" { move || snake.get().len() - 3 }</h3>
         <main
             on: click=move |event| {
-                let click_x = event.offset_x() as f64;
-                let click_y = event.offset_y() as f64;
+                let x = event.offset_x() as f64;
+                let y = event.offset_y() as f64;
 
-                // 写出对角线方程，判断点击的位置
-                let direction = match (click_y > click_x, click_y > HEIGHT as f64 - click_x) {
+                // 利用对角线方程，判断点击的位置
+                let direction = match (y > x, y > HEIGHT as f64 - x) {
+                    (false, false) => Directions::Up,
+                    (true, false) => Directions::Left,
+                    (true, true) => Directions::Down,
+                    (false, true) => Directions::Right,
+                };
+
+                if direction != current_direction.get() && direction != current_direction.get().reverse()  {
+                    current_direction.set(direction);
+                }
+            }
+            on: touchend=move |event| {
+                let touch = event.changed_touches().get(0).expect("获取触摸点失败");
+
+                let x = touch.client_x() as f64 - canvas_clone.offset_left() as f64;
+                let y = touch.client_y() as f64 - canvas_clone.offset_top() as f64;
+
+                // 利用对角线方程，判断点击的位置
+                let direction = match (y > x, y > HEIGHT as f64 - x) {
                     (false, false) => Directions::Up,
                     (true, false) => Directions::Left,
                     (true, true) => Directions::Down,
