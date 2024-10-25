@@ -4,14 +4,16 @@ use charming::{
     component::{Axis, Grid, Title},
     element::{AreaStyle, AxisLabel, AxisPointer, AxisType, ItemStyle, Label, LineStyle, Symbol},
     series::Line,
-    Chart, WasmRenderer,
+    Chart, ChartResize, WasmRenderer,
 };
+use ev::resize;
 use gloo::net::http::Request;
 use leptos::*;
 use leptos_router::*;
 use rand::random;
 use serde::{Deserialize, Serialize};
 use snake::Snake;
+use web_sys::HtmlDivElement;
 
 fn main() {
     mount_to_body(move || view! { <App /> });
@@ -34,6 +36,7 @@ fn Home() -> impl IntoView {
     let stock = create_rw_signal(0);
     let width: RwSignal<u32> = create_rw_signal(900);
     let height: RwSignal<u32> = create_rw_signal(600);
+    let chart_node = create_node_ref();
 
     let paths = vec![
         "data/data_index.csv".to_string(),
@@ -42,14 +45,35 @@ fn Home() -> impl IntoView {
     ];
     let path = move || paths[stock.get()].clone();
 
-    let resource = create_resource(path.clone(), move |path| async move {
+    let data_resource = create_resource(path, move |path| async move {
         // 读取并计算数据
         let data = compute_data(path).await.unwrap();
         // 生成图表
-        let chart = chart(data);
+        let chart = chart(data.clone());
         // 渲染图表
-        let renderer = WasmRenderer::new(width.get(), height.get());
-        renderer.render("chart", &chart).unwrap();
+        let renderer = WasmRenderer::new_opt(None, None);
+        let _this_echarts = renderer.render("chart", &chart).unwrap();
+        data
+    });
+
+    let _plot_resource = create_resource(
+        move || (width.get(), height.get()),
+        move |(width, height)| async move {
+            let data = data_resource.get().unwrap();
+            let chart = chart(data);
+            let renderer = WasmRenderer::new_opt(None, None);
+            let this_echarts = renderer.render("chart", &chart).unwrap();
+            WasmRenderer::resize_chart(
+                &this_echarts,
+                ChartResize::new(width, height, false, Option::None),
+            );
+        },
+    );
+
+    window_event_listener(resize, move |_| {
+        let node: &HtmlDivElement = &(*chart_node.get().unwrap());
+        width.set(node.client_width().try_into().unwrap());
+        height.set(node.client_height().try_into().unwrap());
     });
 
     view! {
@@ -73,8 +97,8 @@ fn Home() -> impl IntoView {
     </aside>
     <main id="figures">
       <figure>
-        <div class="plot" id="chart">{ move ||
-            match resource.get() {
+        <div class="plot" id="chart" node_ref=chart_node>{ move ||
+            match data_resource.get() {
                 None => view! { "正在计算数据..." },
                 Some(_) => view! { "正在渲染图表..." },
             }
