@@ -32,19 +32,23 @@ fn App() -> impl IntoView {
 #[component]
 fn Home() -> impl IntoView {
     let stock = create_rw_signal(0);
+    let width: RwSignal<u32> = create_rw_signal(900);
+    let height: RwSignal<u32> = create_rw_signal(600);
+
     let paths = vec![
         "data/data_index.csv".to_string(),
         "data/data_maotai.csv".to_string(),
         "data/data_mengjie.csv".to_string(),
     ];
     let path = move || paths[stock.get()].clone();
-    let resource = create_resource(path.clone(), |path| async move {
+
+    let resource = create_resource(path.clone(), move |path| async move {
         // 读取并计算数据
         let data = compute_data(path).await.unwrap();
         // 生成图表
         let chart = chart(data);
         // 渲染图表
-        let renderer = WasmRenderer::new(900, 600);
+        let renderer = WasmRenderer::new(width.get(), height.get());
         renderer.render("chart", &chart).unwrap();
     });
 
@@ -205,7 +209,7 @@ async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error:
                     let will_win = level > random::<f64>();
                     let will_participate = participation > random::<f64>();
                     if (is_growing == will_win) && will_participate {
-                        return acc * this_return * (1. - trading_cost)
+                        return acc * this_return * (1. - trading_cost);
                     }
                     acc
                 })
