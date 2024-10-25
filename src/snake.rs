@@ -185,7 +185,7 @@ pub fn Snake() -> impl IntoView {
             {canvas}
         </main>
         <h6>"手机：点击画面上下左右"</h6>
-        <h6>"电脑：上下左右键或wasd键"</h6>
+        <h6>"电脑：W A S D 键或上下左右键"</h6>
         <footer>
             "Made by Cavendish. Back to " <a href="/">"Home"</a> "."
         </footer>
