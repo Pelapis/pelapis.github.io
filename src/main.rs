@@ -114,7 +114,6 @@ fn Home() -> impl IntoView {
       // 链接到贪吃蛇小游戏
       <a href="/snake">"贪吃蛇🐍小游戏"</a>
     </footer>
-    <script type="module" src="index.js"></script>
     }
 }
 
