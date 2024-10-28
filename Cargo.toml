@@ -1,5 +1,5 @@
 [package]
-name = "dioxus-page"
+name = "dioxus-test"
 version = "0.1.0"
 authors = ["Flightless <pelapi@qq.com>"]
 edition = "2021"
@@ -8,9 +8,19 @@ edition = "2021"
 
 [dependencies]
 
-dioxus = { version = "0.5", features = ["dioxus-router", "web"] }
+dioxus = { version = "0.6.0-alpha.3", features = ["web", "router"] }
 
-# Debug
-tracing = "0.1.40"
-dioxus-logger = "0.5.0"
-dioxus-router = "0.5.6"
+charming = { git = "https://github.com/yuankunzhang/charming.git", features = [
+    "wasm",
+] }
+gloo = "0.11.0"
+rand = "0.8.5"
+serde = "1.0.213"
+# web-sys = { version = "0.3.72", features = [
+#     "HtmlCanvasElement",
+#     "CanvasRenderingContext2d",
+#     "HtmlElement",
+#     "TouchEvent",
+#     "TouchList",
+#     "Touch",
+# ] }
