@@ -63,13 +63,13 @@ fn Home() -> Element {
             p { "沪深300指数，贵州茅台 和 梦洁股份" }
         }
         aside {
-            button { onclick: move |_| stock.set(0), class: if *stock.read() == 0 { "active" } else { "" },
+            button { onclick: move |_| stock.set(0), class: if stock() == 0 { "active" } else { "" },
                 "沪深300"
             }
-            button { onclick: move |_| stock.set(1), class: if *stock.read() == 1 { "active" } else { "" },
+            button { onclick: move |_| stock.set(1), class: if stock() == 1 { "active" } else { "" },
                 "贵州茅台"
             }
-            button { onclick: move |_| stock.set(2), class: if *stock.read() == 2 { "active" } else { "" },
+            button { onclick: move |_| stock.set(2), class: if stock() == 2 { "active" } else { "" },
                 "梦洁股份"
             }
         }
