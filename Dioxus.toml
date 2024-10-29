@@ -35,6 +35,11 @@ script = [
   "https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js",
 ]
 
+# CSS code file
+style = [
+  "style.css",
+]
+
 [web.resource.dev]
 
 # Javascript code file
