@@ -27,8 +27,7 @@ pub fn Snake() -> Element {
         )
     });
     let mut current_direction = use_signal(move || Directions::Up);
-    let mut ctx: Signal<Option<CanvasRenderingContext2d>> = use_signal(move || None);
-    let mut canvas_origin = use_signal(move || (0., 0.));
+    let mut canvas: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(move || None);
 
     let world = use_memo(move || {
         let mut world = vec![vec![WorldStates::None; CELL_COUNT as usize]; CELL_COUNT as usize];
@@ -77,7 +76,8 @@ pub fn Snake() -> Element {
     });
 
     let _ = use_effect(move || {
-        let ctx = &ctx().unwrap();
+        let canvas = canvas().expect("canvas is not mounted").as_web_event().dyn_into::<HtmlCanvasElement>().expect("canvas is not HtmlCanvasElement");
+        let ctx = canvas.get_context("2d").unwrap().unwrap().dyn_into::<CanvasRenderingContext2d>().expect("Failed to convert to CanvasRenderingContext2d");
 
         // 画出网格
         ctx.clear_rect(0.0, 0.0, WIDTH as f64, HEIGHT as f64);
@@ -138,29 +138,30 @@ pub fn Snake() -> Element {
             h1 { "贪吃蛇" }
         }
         h3 { "得分：{snake().len() - 3}" }
-        main { ontouchend: move |event| {
-            let touch = event.data().touches_changed().get(0).unwrap().client_coordinates().to_tuple();
+        main { ontouchend: move |event| async move {
+                let touch = event.data().touches_changed().get(0).unwrap().client_coordinates().to_tuple();
 
-            let x = touch.0 - canvas_origin().0;
-            let y = touch.1 - canvas_origin().1;
+                let origin = canvas().expect("canvas is not mounted").get_client_rect().await.unwrap().origin;
+                let x = touch.0 - origin.x;
+                let y = touch.1 - origin.y;
 
-            // 利用对角线方程，判断点击的位置
-            let direction = match (y > x, y > HEIGHT as f64 - x) {
-                (false, false) => Directions::Up,
-                (true, false) => Directions::Left,
-                (true, true) => Directions::Down,
-                (false, true) => Directions::Right,
-            };
+                // 利用对角线方程，判断点击的位置
+                let direction = match (y > x, y > HEIGHT as f64 - x) {
+                    (false, false) => Directions::Up,
+                    (true, false) => Directions::Left,
+                    (true, true) => Directions::Down,
+                    (false, true) => Directions::Right,
+                };
 
-            if direction != current_direction() && direction != current_direction().reverse()  {
-                current_direction.set(direction);
+                if direction != current_direction() && direction != current_direction().reverse()  {
+                    current_direction.set(direction);
+                }
+            },
+            div {
+                canvas { onmounted: move |element| async move {
+                    canvas.set(Some(element.data()));
+                }, }
             }
-        },
-            canvas { onmounted: move |element| async move {
-                canvas_origin.set(element.data().get_client_rect().await.unwrap().origin.to_tuple());
-                let this_ctx: CanvasRenderingContext2d = element.as_web_event().unchecked_into::<HtmlCanvasElement>().get_context("2d").unwrap().unwrap().unchecked_into();
-                ctx.set(Some(this_ctx));
-            }, }
         }
         h6 { "手机：点击画面上下左右" }
         h6 { "电脑：W A S D 键或上下左右键" }
