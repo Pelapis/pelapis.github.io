@@ -48,6 +48,18 @@ fn Home() -> Element {
         async { compute_data(path).await.unwrap() }
     });
 
+    let echart_resource = use_resource(move || async move {
+        match data_resource() {
+            None => None,
+            Some(data) => {
+                let chart = chart(data);
+                let renderer = WasmRenderer::new_opt(None, None);
+                let echarts = renderer.render("chart", &chart).unwrap();
+                Some(echarts)
+            }
+        }
+    });
+
     rsx! {
         document::Link { rel: "stylesheet", href: "style.css" }
         document::Script { src: "https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js" }
@@ -72,22 +84,13 @@ fn Home() -> Element {
                 div { class: "plot", id: "chart", onresize: move |ev| {
                         // 响应性调整图表大小
                         let (w, h) = ev.data().get_content_box_size().unwrap().to_tuple();
-                        if let Some(data) = data_resource() {
-                            let chart = chart(data);
-                            let renderer = WasmRenderer::new_opt(None, None);
-                            let echarts = renderer.render("chart", &chart).unwrap();
-                            WasmRenderer::resize_chart(
-                                &echarts,
-                                ChartResize::new(w as u32, h as u32, false, Option::None),
-                            );
+                        if let Some(Some(echart)) = &*echart_resource.read() {
+                            WasmRenderer::resize_chart(&echart, ChartResize::new(w as u32, h as u32, false, Option::None));
                         }
                     },
                     match data_resource() {
                         None => "正在计算数据...",
-                        Some(data) => {
-                            let chart = chart(data);
-                            let renderer = WasmRenderer::new_opt(None, None);
-                            renderer.render("chart", &chart).unwrap();
+                        Some(_) => {
                             "计算完成，正在绘制图表..."
                         },
                     }
