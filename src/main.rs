@@ -42,21 +42,15 @@ fn Home() -> Element {
         "data/data_mengjie.csv".to_string(),
     ];
 
-    let data_resource = use_resource(move || {
+    let echart_resource = use_resource(move || {
+        // 计算数据并绘制图表
         let path = paths[stock()].clone();
-        // 读取并计算数据
-        async { compute_data(path).await.unwrap() }
-    });
-
-    let echart_resource = use_resource(move || async move {
-        match data_resource() {
-            None => None,
-            Some(data) => {
-                let chart = chart(data);
-                let renderer = WasmRenderer::new_opt(None, None);
-                let echarts = renderer.render("chart", &chart).unwrap();
-                Some(echarts)
-            }
+        async {
+            let data = compute_data(path).await.unwrap();
+            let chart = chart(data);
+            let renderer = WasmRenderer::new_opt(None, None);
+            let echarts = renderer.render("chart", &chart).unwrap();
+            echarts
         }
     });
 
@@ -84,11 +78,11 @@ fn Home() -> Element {
                 div { class: "plot", id: "chart", onresize: move |ev| {
                         // 响应性调整图表大小
                         let (w, h) = ev.data().get_content_box_size().unwrap().to_tuple();
-                        if let Some(Some(echart)) = &*echart_resource.read() {
+                        if let Some(echart) = &*echart_resource.read() {
                             WasmRenderer::resize_chart(&echart, ChartResize::new(w as u32, h as u32, false, Option::None));
                         }
                     },
-                    match data_resource() {
+                    match &*echart_resource.read() {
                         None => "正在计算数据...",
                         Some(_) => {
                             "计算完成，正在绘制图表..."
