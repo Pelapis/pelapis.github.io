@@ -76,8 +76,17 @@ pub fn Snake() -> Element {
     });
 
     let _ = use_effect(move || {
-        let canvas = canvas().expect("canvas is not mounted").as_web_event().dyn_into::<HtmlCanvasElement>().expect("canvas is not HtmlCanvasElement");
-        let ctx = canvas.get_context("2d").unwrap().unwrap().dyn_into::<CanvasRenderingContext2d>().expect("Failed to convert to CanvasRenderingContext2d");
+        let canvas = canvas()
+            .expect("canvas is not mounted")
+            .as_web_event()
+            .dyn_into::<HtmlCanvasElement>()
+            .expect("canvas is not HtmlCanvasElement");
+        let ctx = canvas
+            .get_context("2d")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<CanvasRenderingContext2d>()
+            .expect("Failed to convert to CanvasRenderingContext2d");
 
         // 画出网格
         ctx.clear_rect(0.0, 0.0, WIDTH as f64, HEIGHT as f64);
