@@ -13,10 +13,9 @@ dioxus = { version = "0.6.0-alpha.3", features = ["web", "router", "html"] }
 charming = { git = "https://github.com/yuankunzhang/charming.git", features = [
     "wasm",
 ] }
-gloo = "0.11.0"
+gloo = { version = "0.11.0", features = ["futures"]}
 rand = "0.8.5"
 serde = "1.0.213"
-tokio = { version = "1.41.0", features = ["time"] }
 web-sys = { version = "0.3.72", features = [
     "HtmlCanvasElement",
     "CanvasRenderingContext2d",

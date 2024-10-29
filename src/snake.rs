@@ -3,7 +3,7 @@ use dioxus::{prelude::*, web::WebEventExt};
 use gloo::{dialogs::alert, events::EventListener, utils::window};
 use rand::random;
 use std::time::Duration;
-use tokio::time::sleep;
+use gloo::timers::future::sleep;
 use web_sys::{wasm_bindgen::JsCast, CanvasRenderingContext2d, HtmlCanvasElement};
 
 // 设定画布的宽高，以及网格的行列数
@@ -37,42 +37,6 @@ pub fn Snake() -> Element {
         let (x, y) = food();
         world[x as usize][y as usize] = WorldStates::Food;
         world
-    });
-
-    let _ = use_future(move || async move {
-        loop {
-            // 根据蛇的长度决定定时器的间隔时间
-            let duration = Duration::from_millis(500 - snake().len() as u64 * 10);
-            sleep(duration).await;
-
-            let mut new_snake = snake();
-            let head = new_snake[0];
-            let new_head = match current_direction() {
-                Directions::Up => (head.0, (head.1 + CELL_COUNT - 1) % CELL_COUNT),
-                Directions::Down => (head.0, (head.1 + 1) % CELL_COUNT),
-                Directions::Left => ((head.0 + CELL_COUNT - 1) % CELL_COUNT, head.1),
-                Directions::Right => ((head.0 + 1) % CELL_COUNT, head.1),
-            };
-
-            // 判断是否碰到蛇身
-            for (x, y) in new_snake.iter() {
-                if new_head == (*x, *y) {
-                    alert(format!("游戏结束！您的得分是：{}！", new_snake.len()).as_str());
-                    window().location().reload().unwrap();
-                }
-            }
-
-            new_snake.insert(0, new_head);
-            if new_head == food() {
-                food.set((
-                    random::<usize>() % CELL_COUNT,
-                    random::<usize>() % CELL_COUNT,
-                ));
-            } else {
-                new_snake.pop();
-            }
-            snake.set(new_snake);
-        }
     });
 
     let _ = use_effect(move || {
@@ -142,6 +106,42 @@ pub fn Snake() -> Element {
         }
     });
 
+    let _ = use_future(move || async move {
+        loop {
+            let mut new_snake = snake();
+            let head = new_snake[0];
+            let new_head = match current_direction() {
+                Directions::Up => (head.0, (head.1 + CELL_COUNT - 1) % CELL_COUNT),
+                Directions::Down => (head.0, (head.1 + 1) % CELL_COUNT),
+                Directions::Left => ((head.0 + CELL_COUNT - 1) % CELL_COUNT, head.1),
+                Directions::Right => ((head.0 + 1) % CELL_COUNT, head.1),
+            };
+
+            // 判断是否碰到蛇身
+            for (x, y) in new_snake.iter() {
+                if new_head == (*x, *y) {
+                    alert(format!("游戏结束！您的得分是：{}！", new_snake.len()).as_str());
+                    window().location().reload().unwrap();
+                }
+            }
+
+            new_snake.insert(0, new_head);
+            if new_head == food() {
+                food.set((
+                    random::<usize>() % CELL_COUNT,
+                    random::<usize>() % CELL_COUNT,
+                ));
+            } else {
+                new_snake.pop();
+            }
+            snake.set(new_snake);
+
+            // 设定定时器的间隔时间
+            let duration = Duration::from_millis(1200 / snake().len() as u64);
+            sleep(duration).await;
+        }
+    });
+
     rsx! {
         header {
             h1 { "贪吃蛇" }
@@ -166,11 +166,9 @@ pub fn Snake() -> Element {
                     current_direction.set(direction);
                 }
             },
-            div {
-                canvas { onmounted: move |element| async move {
-                    canvas.set(Some(element.data()));
-                }, }
-            }
+            canvas { width: WIDTH as f64, height: HEIGHT as f64, onmounted: move |element| async move {
+                canvas.set(Some(element.data()));
+            }, }
         }
         h6 { "手机：点击画面上下左右" }
         h6 { "电脑：W A S D 键或上下左右键" }
