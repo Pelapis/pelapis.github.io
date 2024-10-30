@@ -1,9 +1,9 @@
 use crate::Route;
 use dioxus::{prelude::*, web::WebEventExt};
-use gloo::{dialogs::alert, events::EventListener, utils::window};
+use gloo::timers::future::sleep;
+use gloo::{dialogs::alert, utils::window};
 use rand::random;
 use std::time::Duration;
-use gloo::timers::future::sleep;
 use web_sys::{wasm_bindgen::JsCast, CanvasRenderingContext2d, HtmlCanvasElement};
 
 // 设定画布的宽高，以及网格的行列数
@@ -90,22 +90,6 @@ pub fn Snake() -> Element {
         }
     });
 
-    // 监听键盘事件
-    let _ = EventListener::new(&window(), "keydown", move |event| {
-        let event = event.unchecked_ref::<web_sys::KeyboardEvent>();
-        let key = &*event.key();
-        let new_direction = match key {
-            "ArrowUp" | "w" | "W" => Directions::Up,
-            "ArrowDown" | "s" | "S" => Directions::Down,
-            "ArrowLeft" | "a" | "A" => Directions::Left,
-            "ArrowRight" | "d" | "D" => Directions::Right,
-            _ => return,
-        };
-        if new_direction != current_direction().reverse() {
-            current_direction.set(new_direction);
-        }
-    });
-
     let _ = use_future(move || async move {
         loop {
             let mut new_snake = snake();
@@ -143,37 +127,55 @@ pub fn Snake() -> Element {
     });
 
     rsx! {
-        header {
-            h1 { "贪吃蛇" }
-        }
-        h3 { "得分：{snake().len() - 3}" }
-        main { ontouchend: move |event| async move {
-                let touch = event.data().touches_changed().get(0).unwrap().client_coordinates().to_tuple();
-
-                let origin = canvas().expect("canvas is not mounted").get_client_rect().await.unwrap().origin;
-                let x = touch.0 - origin.x;
-                let y = touch.1 - origin.y;
-
-                // 利用对角线方程，判断点击的位置
-                let direction = match (y > x, y > HEIGHT as f64 - x) {
-                    (false, false) => Directions::Up,
-                    (true, false) => Directions::Left,
-                    (true, true) => Directions::Down,
-                    (false, true) => Directions::Right,
+        div { onkeydown: move |event| {
+                let data = event.data();
+                let key = data.key();
+                if key == Key::ArrowUp || key == Key::ArrowDown || key == Key::ArrowLeft || key == Key::ArrowRight {
+                    event.prevent_default();
+                }
+                let new_direction = match key {
+                    Key::ArrowUp => Directions::Up,
+                    Key::ArrowDown => Directions::Down,
+                    Key::ArrowLeft => Directions::Left,
+                    Key::ArrowRight => Directions::Right,
+                    _ => return,
                 };
-
-                if direction != current_direction() && direction != current_direction().reverse()  {
-                    current_direction.set(direction);
+                if new_direction != current_direction().reverse() {
+                    current_direction.set(new_direction);
                 }
             },
-            canvas { width: WIDTH as f64, height: HEIGHT as f64, onmounted: move |element| async move {
-                canvas.set(Some(element.data()));
-            }, }
-        }
-        h6 { "手机：点击画面上下左右" }
-        h6 { "电脑：W A S D 键或上下左右键" }
-        footer {
-            "Made by Cavendish. Back to  " Link { to: Route::Home {}, "Home" } "."
+            header {
+                h1 { "贪吃蛇" }
+            }
+            h3 { "得分：{snake().len() - 3}" }
+            main { ontouchend: move |event| async move {
+                    let touch = event.data().touches_changed().get(0).unwrap().client_coordinates().to_tuple();
+
+                    let origin = canvas().expect("canvas is not mounted").get_client_rect().await.unwrap().origin;
+                    let x = touch.0 - origin.x;
+                    let y = touch.1 - origin.y;
+
+                    // 利用对角线方程，判断点击的位置
+                    let direction = match (y > x, y > HEIGHT as f64 - x) {
+                        (false, false) => Directions::Up,
+                        (true, false) => Directions::Left,
+                        (true, true) => Directions::Down,
+                        (false, true) => Directions::Right,
+                    };
+
+                    if direction != current_direction() && direction != current_direction().reverse()  {
+                        current_direction.set(direction);
+                    }
+                },
+                canvas { width: WIDTH as f64, height: HEIGHT as f64, onmounted: move |element| async move {
+                    canvas.set(Some(element.data()));
+                }, }
+            }
+            h6 { "手机：点击画面上下左右" }
+            h6 { "电脑：W A S D 键或上下左右键" }
+            footer {
+                "Made by Cavendish. Back to  " Link { to: Route::Home {}, "Home" } "."
+            }
         }
     }
 }
