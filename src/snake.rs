@@ -94,18 +94,40 @@ pub fn Snake() -> Element {
         loop {
             let mut new_snake = snake();
             let head = new_snake[0];
+            let mut will_hit_wall = false;
             let new_head = match current_direction() {
-                Directions::Up => (head.0, (head.1 + CELL_COUNT - 1) % CELL_COUNT),
-                Directions::Down => (head.0, (head.1 + 1) % CELL_COUNT),
-                Directions::Left => ((head.0 + CELL_COUNT - 1) % CELL_COUNT, head.1),
-                Directions::Right => ((head.0 + 1) % CELL_COUNT, head.1),
+                Directions::Up => {
+                    if head.1 == 0 {
+                        will_hit_wall = true
+                    }
+                    (head.0, (head.1 + CELL_COUNT - 1) % CELL_COUNT)
+                }
+                Directions::Down => {
+                    if head.1 == CELL_COUNT - 1 {
+                        will_hit_wall = true
+                    }
+                    (head.0, (head.1 + 1) % CELL_COUNT)
+                }
+                Directions::Left => {
+                    if head.0 == 0 {
+                        will_hit_wall = true
+                    }
+                    ((head.0 + CELL_COUNT - 1) % CELL_COUNT, head.1)
+                }
+                Directions::Right => {
+                    if head.0 == CELL_COUNT - 1 {
+                        will_hit_wall = true
+                    }
+                    ((head.0 + 1) % CELL_COUNT, head.1)
+                }
             };
 
-            // 判断是否碰到蛇身
+            // 判断是否撞到蛇身或墙壁
             for (x, y) in new_snake.iter() {
-                if new_head == (*x, *y) {
+                if new_head == (*x, *y) || will_hit_wall {
                     alert(format!("游戏结束！您的得分是：{}！", new_snake.len()).as_str());
                     window().location().reload().unwrap();
+                    return;
                 }
             }
 
@@ -127,7 +149,11 @@ pub fn Snake() -> Element {
     });
 
     rsx! {
-        div { onkeydown: move |event| {
+        header {
+            h1 { "贪吃蛇" }
+        }
+        h3 { "得分：{snake().len() - 3}" }
+        main { tabindex: "0", onmounted: move |event| async move {let _ = event.data().set_focus(true).await;}, onkeydown: move |event| {
                 let data = event.data();
                 let key = data.key();
                 if key == Key::ArrowUp || key == Key::ArrowDown || key == Key::ArrowLeft || key == Key::ArrowRight {
@@ -138,44 +164,42 @@ pub fn Snake() -> Element {
                     Key::ArrowDown => Directions::Down,
                     Key::ArrowLeft => Directions::Left,
                     Key::ArrowRight => Directions::Right,
+                    Key::Character(x) if x == "w" => Directions::Up,
+                    Key::Character(x) if x == "s" => Directions::Down,
+                    Key::Character(x) if x == "a" => Directions::Left,
+                    Key::Character(x) if x == "d" => Directions::Right,
                     _ => return,
                 };
                 if new_direction != current_direction().reverse() {
                     current_direction.set(new_direction);
                 }
+            }, ontouchend: move |event| async move {
+                let touch = event.data().touches_changed().get(0).unwrap().client_coordinates().to_tuple();
+
+                let origin = canvas().expect("canvas is not mounted").get_client_rect().await.unwrap().origin;
+                let x = touch.0 - origin.x;
+                let y = touch.1 - origin.y;
+
+                // 利用对角线方程，判断点击的位置
+                let direction = match (y > x, y > HEIGHT as f64 - x) {
+                    (false, false) => Directions::Up,
+                    (true, false) => Directions::Left,
+                    (true, true) => Directions::Down,
+                    (false, true) => Directions::Right,
+                };
+
+                if direction != current_direction() && direction != current_direction().reverse()  {
+                    current_direction.set(direction);
+                }
             },
-            header {
-                h1 { "贪吃蛇" }
-            }
-            h3 { "得分：{snake().len() - 3}" }
-            main { ontouchend: move |event| async move {
-                    let touch = event.data().touches_changed().get(0).unwrap().client_coordinates().to_tuple();
-
-                    let origin = canvas().expect("canvas is not mounted").get_client_rect().await.unwrap().origin;
-                    let x = touch.0 - origin.x;
-                    let y = touch.1 - origin.y;
-
-                    // 利用对角线方程，判断点击的位置
-                    let direction = match (y > x, y > HEIGHT as f64 - x) {
-                        (false, false) => Directions::Up,
-                        (true, false) => Directions::Left,
-                        (true, true) => Directions::Down,
-                        (false, true) => Directions::Right,
-                    };
-
-                    if direction != current_direction() && direction != current_direction().reverse()  {
-                        current_direction.set(direction);
-                    }
-                },
-                canvas { width: WIDTH as f64, height: HEIGHT as f64, onmounted: move |element| async move {
-                    canvas.set(Some(element.data()));
-                }, }
-            }
-            h6 { "手机：点击画面上下左右" }
-            h6 { "电脑：W A S D 键或上下左右键" }
-            footer {
-                "Made by Cavendish. Back to  " Link { to: Route::Home {}, "Home" } "."
-            }
+            canvas { width: WIDTH as f64, height: HEIGHT as f64, onmounted: move |element| async move {
+                canvas.set(Some(element.data()));
+            }, }
+        }
+        h6 { "手机：点击画面上下左右" }
+        h6 { "电脑：W A S D 键或上下左右键" }
+        footer {
+            "Made by Cavendish. Back to  " Link { to: Route::Home {}, "Home" } "."
         }
     }
 }
