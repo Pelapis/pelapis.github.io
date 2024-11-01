@@ -224,10 +224,10 @@ async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error:
             .collect();
 
         // 计算统计学特征，只保留一个数值
-        let mean = investor_returns.iter().sum::<f64>() / investor_count as f64;
         investor_returns.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        let percentile10 = investor_returns[(investor_count as f64 * 0.1 - 1.).ceil() as usize];
-        let percentile90 = investor_returns[(investor_count as f64 * 0.8 - 1.).ceil() as usize];
+        let mean: f64 = investor_returns.iter().sum::<f64>() / investor_count as f64;
+        let percentile10 = investor_returns[investor_count / 10];
+        let percentile90 = investor_returns[investor_count * 9 / 10];
         data[i].value = mean;
         data[i].l = percentile10;
         data[i].u = percentile90;

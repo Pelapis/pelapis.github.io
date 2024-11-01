@@ -143,7 +143,7 @@ pub fn Snake() -> Element {
             snake.set(new_snake);
 
             // 设定定时器的间隔时间
-            let duration = Duration::from_millis(1200 / snake().len() as u64);
+            let duration = Duration::from_millis(900 / snake().len() as u64 + 100);
             sleep(duration).await;
         }
     });
