@@ -23,13 +23,11 @@ enum Route {
 }
 
 fn main() {
-    launch(App);
-}
-
-fn App() -> Element {
-    rsx! {
-        Router::<Route> {}
-    }
+    launch(move || {
+        rsx! {
+            Router::<Route> {}
+        }
+    });
 }
 
 #[component]
