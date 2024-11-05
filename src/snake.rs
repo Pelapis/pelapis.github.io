@@ -1,8 +1,10 @@
 use crate::Route;
 use dioxus::{prelude::*, web::WebEventExt};
+use gloo::events::EventListener;
 use gloo::timers::future::sleep;
 use gloo::{dialogs::alert, utils::window};
 use rand::random;
+use web_sys::KeyboardEvent;
 use std::time::Duration;
 use web_sys::{wasm_bindgen::JsCast, CanvasRenderingContext2d, HtmlCanvasElement};
 
@@ -148,32 +150,29 @@ pub fn Snake() -> Element {
         }
     });
 
+    EventListener::new(&window(), "keydown", move |event| {
+        let key = event.dyn_ref::<KeyboardEvent>().unwrap().key();
+        if key == "ArrowUp" || key == "ArrowDown" || key == "ArrowLeft" || key == "ArrowRight" {
+            event.prevent_default();
+        }
+        let new_direction = match key.as_str() {
+            "ArrowUp" | "w" => Directions::Up,
+            "ArrowDown" | "s" => Directions::Down,
+            "ArrowLeft" | "a" => Directions::Left,
+            "ArrowRight" | "d" => Directions::Right,
+            _ => return,
+        };
+        if new_direction != current_direction().reverse() {
+            current_direction.set(new_direction);
+        }
+    }).forget();
+
     rsx! {
         header {
             h1 { "贪吃蛇" }
         }
         h3 { "得分：{snake().len() - 3}" }
-        main { tabindex: "0", onmounted: move |event| async move {let _ = event.data().set_focus(true).await;}, onkeydown: move |event| {
-                let data = event.data();
-                let key = data.key();
-                if key == Key::ArrowUp || key == Key::ArrowDown || key == Key::ArrowLeft || key == Key::ArrowRight {
-                    event.prevent_default();
-                }
-                let new_direction = match key {
-                    Key::ArrowUp => Directions::Up,
-                    Key::ArrowDown => Directions::Down,
-                    Key::ArrowLeft => Directions::Left,
-                    Key::ArrowRight => Directions::Right,
-                    Key::Character(x) if x == "w" => Directions::Up,
-                    Key::Character(x) if x == "s" => Directions::Down,
-                    Key::Character(x) if x == "a" => Directions::Left,
-                    Key::Character(x) if x == "d" => Directions::Right,
-                    _ => return,
-                };
-                if new_direction != current_direction().reverse() {
-                    current_direction.set(new_direction);
-                }
-            }, ontouchend: move |event| async move {
+        main { ontouchend: move |event| async move {
                 let touch = event.data().touches_changed().get(0).unwrap().client_coordinates().to_tuple();
 
                 let origin = canvas().expect("canvas is not mounted").get_client_rect().await.unwrap().origin;
