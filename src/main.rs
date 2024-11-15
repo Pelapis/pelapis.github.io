@@ -25,6 +25,9 @@ enum Route {
 fn main() {
     launch(move || {
         rsx! {
+            document::Link { rel: "stylesheet", href: "style.css" }
+            document::Script { src: "https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js" }
+            document::Script { src: "https://cdn.jsdelivr.net/npm/echarts-gl@2.0.8/dist/echarts-gl.min.js" }
             Router::<Route> {}
         }
     });
@@ -53,9 +56,6 @@ fn Home() -> Element {
     });
 
     rsx! {
-        document::Link { rel: "stylesheet", href: "style.css" }
-        document::Script { src: "https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js" }
-        document::Script { src: "https://cdn.jsdelivr.net/npm/echarts-gl@2.0.8/dist/echarts-gl.min.js" }
         header {
             h1 { "投资模拟" }
             p { "沪深300指数，贵州茅台 和 梦洁股份" }
