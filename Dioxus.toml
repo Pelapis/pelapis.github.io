@@ -1,17 +1,25 @@
 [application]
 
-# App (Project) Name
-name = "dioxus-test"
+# dioxus project name
+name = "投资模拟"
 
-# Dioxus App Default Platform
-# web, desktop, fullstack
+# default platform
+# you can also use `dx serve/build --platform XXX` to use other platform
+# value: web | desktop
 default_platform = "web"
 
-# `build` & `serve` dist path
+# Web `build` & `serve` dist path
 out_dir = "docs"
 
-# resource (assets) file folder
+# resource (static) file folder
 asset_dir = "assets"
+
+# hot reload by default
+hot_reload = true
+
+[web.wasm_opt]
+# The level wasm-opt should target. z is the smallest. 4 is the fastest.
+level = "4"
 
 [web.app]
 
@@ -20,17 +28,33 @@ title = "投资模拟"
 
 [web.watcher]
 
-# when watcher trigger, regenerate the `index.html`
-reload_html = true
+index_on_404 = true
 
-# which files or dirs will be watcher monitoring
-watch_path = ["src", "assets"]
+watch_path = ["src", "examples"]
 
-# include `assets` in web platform
-[web.resource]
+[bundler]
+# Bundle identifier
+identifier = "io.github.投资模拟"
 
-[web.resource.dev]
+# Bundle publisher
+publisher = "投资模拟"
 
-# Javascript code file
-# serve: [dev-server] only
-script = []
+# Bundle icon
+icon = ["icons/icon.png"]
+
+# Bundle resources
+resources = ["public/*"]
+
+# Bundle copyright
+copyright = ""
+
+# Bundle category
+category = "Utility"
+
+# Bundle short description
+short_description = "An amazing dioxus application."
+
+# Bundle long description
+long_description = """
+An amazing dioxus application.
+"""
