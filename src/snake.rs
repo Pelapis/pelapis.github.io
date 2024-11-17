@@ -191,7 +191,7 @@ pub fn Snake() -> Element {
                     .origin;
                 let x = touch.0 - origin.x;
                 let y = touch.1 - origin.y;
-                let direction = match (y > x, y > HEIGHT as f64 - x) {
+                let direction = match (y > x, x + y > HEIGHT as f64 / 2.) {
                     (false, false) => Directions::Up,
                     (true, false) => Directions::Left,
                     (true, true) => Directions::Down,
