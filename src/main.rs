@@ -2,17 +2,26 @@
 
 mod snake;
 
-use charming::{
-    component::{Axis, Grid, Title},
-    element::{AreaStyle, AxisLabel, AxisPointer, AxisType, ItemStyle, Label, LineStyle, Symbol},
-    series::Line,
-    Chart, ChartResize, WasmRenderer,
-};
 use dioxus::prelude::*;
 use gloo::net::http::Request;
+use plotters::prelude::*;
+use plotters_canvas::CanvasBackend;
 use rand::random;
 use serde::{Deserialize, Serialize};
 use snake::Snake;
+
+const DAYS: [(usize, &str); 10] = [
+    (1, "1天"),
+    (2, "2天"),
+    (3, "3天"),
+    (5, "1周"),
+    (10, "2周"),
+    (21, "1月"),
+    (63, "1季"),
+    (250, "1年"),
+    (1250, "5年"),
+    (2500, "10年"),
+];
 
 #[derive(Clone, Routable, Debug, PartialEq)]
 enum Route {
@@ -25,9 +34,7 @@ enum Route {
 fn main() {
     launch(move || {
         rsx! {
-            document::Link { rel: "stylesheet", href: "style.css" }
-            document::Script { src: "https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js" }
-            document::Script { src: "https://cdn.jsdelivr.net/npm/echarts-gl@2.0.8/dist/echarts-gl.min.js" }
+            document::Stylesheet { href: asset!("/assets/style.css") }
             Router::<Route> {}
         }
     });
@@ -37,61 +44,41 @@ fn main() {
 fn Home() -> Element {
     let mut stock = use_signal(move || 0);
 
-    let paths = vec![
-        "data/data_index.csv".to_string(),
-        "data/data_maotai.csv".to_string(),
-        "data/data_mengjie.csv".to_string(),
-    ];
-
-    let echart_resource = use_resource(move || {
-        // 计算数据并绘制图表
-        let path = paths[stock()].clone();
-        async {
-            let data = compute_data(path).await.unwrap();
-            let chart = chart(data);
-            let renderer = WasmRenderer::new_opt(None, None);
-            let echarts = renderer.render("chart", &chart).unwrap();
-            echarts
-        }
-    });
-
     rsx! {
         header {
             h1 { "投资模拟" }
             p { "沪深300指数，贵州茅台 和 梦洁股份" }
         }
-        aside {
-            button { onclick: move |_| stock.set(0), class: if stock() == 0 { "active" } else { "" },
+        nav {
+            button {
+                onclick: move |_| stock.set(0),
+                class: if stock() == 0 { "active" } else { "" },
                 "沪深300"
             }
-            button { onclick: move |_| stock.set(1), class: if stock() == 1 { "active" } else { "" },
+            button {
+                onclick: move |_| stock.set(1),
+                class: if stock() == 1 { "active" } else { "" },
                 "贵州茅台"
             }
-            button { onclick: move |_| stock.set(2), class: if stock() == 2 { "active" } else { "" },
+            button {
+                onclick: move |_| stock.set(2),
+                class: if stock() == 2 { "active" } else { "" },
                 "梦洁股份"
             }
         }
         main { id: "figures",
             figure {
-                div { class: "plot", id: "chart", onresize: move |ev| {
-                        // 响应性调整图表大小
-                        let (w, h) = ev.data().get_content_box_size().unwrap().to_tuple();
-                        if let Some(echart) = &*echart_resource.read() {
-                            WasmRenderer::resize_chart(&echart, ChartResize::new(w as u32, h as u32, false, Option::None));
-                        }
-                    },
-                    match &*echart_resource.read() {
-                        None => "正在计算数据...",
-                        Some(_) => { "计算完成，正在绘制图表..." },
-                    }
-                }
+                Chart { stock }
                 figcaption { "中水平组😐（正确率0.5）" }
             }
         }
         footer {
             p {
-                "Made by " strong { "Cavendish" } ". The source code is on "
-                a { href: "https://github.com/Pelapis/invest-simulation", "GitHub" } "."
+                "Made by "
+                strong { "Cavendish" }
+                ". The source code is on "
+                a { href: "https://github.com/Pelapis/invest-simulation", "GitHub" }
+                "."
             }
             // 链接到贪吃蛇小游戏
             Link { to: Route::Snake {}, "贪吃蛇🐍小游戏" }
@@ -99,64 +86,73 @@ fn Home() -> Element {
     }
 }
 
-fn chart(data: Vec<DataItem>) -> Chart {
-    /* let base = -data
-    .iter()
-    .fold(f64::INFINITY, |min, val| f64::floor(f64::min(min, val.l))); */
-    let base = 0.;
+#[component]
+fn Chart(stock: Signal<usize>) -> Element {
+    let plot_resource = use_resource(move || async move {
+        let paths = vec![
+            "assets/data/data_index.csv".to_string(),
+            "assets/data/data_maotai.csv".to_string(),
+            "assets/data/data_mengjie.csv".to_string(),
+        ];
+        let data = compute_data(paths[stock()].clone()).await.unwrap();
 
-    Chart::new()
-        .title(Title::new().text("收益-持有期曲线图").left("center"))
-        .grid(
-            Grid::new()
-                .left("3%")
-                .right("4%")
-                .bottom("3%")
-                .contain_label(true),
-        )
-        .x_axis(
-            Axis::new()
-                .type_(AxisType::Category)
-                .data(data.iter().map(|x| x.date.clone()).collect())
-                .boundary_gap(false),
-        )
-        .y_axis(
-            Axis::new()
-                .axis_label(AxisLabel::new())
-                .axis_pointer(AxisPointer::new().label(Label::new()))
-                .split_number(3),
-        )
-        .series(
-            Line::new()
-                .name("L")
-                .data(data.iter().map(|x| x.l + base).collect())
-                .line_style(LineStyle::new().opacity(0))
-                .stack("confidence-band")
-                .symbol(Symbol::None),
-        )
-        .series(
-            Line::new()
-                .name("U")
-                .data(data.iter().map(|x| x.u - x.l).collect())
-                .line_style(LineStyle::new().opacity(0))
-                .area_style(AreaStyle::new().color("#ccc"))
-                .stack("confidence-band")
-                .symbol(Symbol::None),
-        )
-        .series(
-            Line::new()
-                .data(data.iter().map(|x| x.value + base).collect())
-                .item_style(ItemStyle::new().color("#333"))
-                .show_symbol(false),
-        )
+        let draw_area = CanvasBackend::new("chart").unwrap().into_drawing_area();
+        draw_area.fill(&WHITE).unwrap();
+        let mut chart = ChartBuilder::on(&draw_area)
+            .caption("收益-持有期曲线图", ("sans-serif", 40).into_font())
+            .margin_right(40)
+            .x_label_area_size(60)
+            .y_label_area_size(80)
+            .build_cartesian_2d(0usize..9, -1.0..12.0)
+            .unwrap();
+        chart
+            .configure_mesh()
+            .label_style(("sans-serif", 24).into_font())
+            .x_label_formatter(&|x| DAYS[*x].1.to_string())
+            .draw()
+            .unwrap();
+
+        // 绘制曲线
+        chart
+            .draw_series(LineSeries::new(
+                data.iter().enumerate().map(|(i, item)| (i, item.value)),
+                BLACK.stroke_width(3),
+            ))
+            .unwrap();
+
+        // 绘制误差区间
+        let points = data
+            .iter()
+            .enumerate()
+            .map(|(i, item)| (i, item.low))
+            .chain(data.iter().enumerate().rev().map(|(i, item)| (i, item.up)))
+            .collect::<Vec<_>>();
+        let polygon = Polygon::new(points, &BLACK.mix(0.2));
+        chart.plotting_area().draw(&polygon).unwrap();
+
+        draw_area.present().unwrap();
+    });
+
+    rsx! {
+        canvas {
+            class: "plot",
+            id: "chart",
+            width: 800 * 2,
+            height: 600 * 2,
+            match plot_resource() {
+                None => "正在计算数据...",
+                Some(_) => { "计算完成，正在绘制图表..." },
+            }
+        }
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 struct DataItem {
     date: String,
     value: f64,
-    l: f64,
-    u: f64,
+    low: f64,
+    up: f64,
 }
 
 async fn request_data(path: String) -> String {
@@ -174,10 +170,6 @@ async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error:
     let trading_cost: f64 = 0.001;
     let level: f64 = 0.5;
     let participation: f64 = 0.5;
-    let days = vec![1, 2, 3, 5, 10, 21, 63, 250, 1250, 2500];
-    let day_names = vec![
-        "1天", "2天", "3天", "1周", "2周", "1月", "1季", "1年", "5年", "10年",
-    ];
 
     // 数据预处理
     let text = request_data(path).await;
@@ -186,51 +178,48 @@ async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error:
         .filter_map(|line| line.split(',').nth(2)?.parse::<f64>().ok())
         .collect();
 
-    let mut data: Vec<DataItem> = vec![
-        DataItem {
-            date: String::new(),
-            value: 0.,
-            l: 0.,
-            u: 0.,
-        };
-        days.len()
-    ];
-
-    for (i, hold_day) in days.iter().enumerate() {
-        let hold_count = return_vector.len().div_ceil(*hold_day);
-        let adjusted_returns: Vec<f64> = (0..hold_count)
-            .map(|j| {
-                return_vector[j * hold_day..return_vector.len().min((j + 1) * hold_day)]
-                    .iter()
-                    .product()
-            })
-            .collect();
-
-        // 计算各投资者的最终收益率
-        let mut investor_returns: Vec<f64> = (0..investor_count)
-            .map(|_| {
-                adjusted_returns.iter().fold(1., |acc, &this_return| {
-                    let is_growing = this_return > 1.;
-                    let will_win = level > random::<f64>();
-                    let will_participate = participation > random::<f64>();
-                    if (is_growing == will_win) && will_participate {
-                        return acc * this_return * (1. - trading_cost);
-                    }
-                    acc
+    // 计算数据
+    let data: Vec<DataItem> = DAYS
+        .iter()
+        .map(|(hold_day, day_name)| {
+            let hold_count = return_vector.len().div_ceil(*hold_day);
+            let adjusted_returns: Vec<f64> = (0..hold_count)
+                .map(|j| {
+                    return_vector[j * hold_day..return_vector.len().min((j + 1) * hold_day)]
+                        .iter()
+                        .product()
                 })
-            })
-            .collect();
+                .collect();
 
-        // 计算统计学特征，只保留一个数值
-        investor_returns.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        let mean: f64 = investor_returns.iter().sum::<f64>() / investor_count as f64;
-        let percentile10 = investor_returns[investor_count / 10];
-        let percentile90 = investor_returns[investor_count * 9 / 10];
-        data[i].value = mean;
-        data[i].l = percentile10;
-        data[i].u = percentile90;
-        data[i].date = day_names[i].to_string();
-    }
+            // 计算各投资者的最终收益率
+            let mut investor_returns: Vec<f64> = (0..investor_count)
+                .map(|_| {
+                    adjusted_returns.iter().fold(1., |acc, &this_return| {
+                        let is_growing = this_return > 1.;
+                        let will_win = level > random::<f64>();
+                        let will_participate = participation > random::<f64>();
+                        if (is_growing == will_win) && will_participate {
+                            return acc * this_return * (1. - trading_cost);
+                        }
+                        acc
+                    })
+                })
+                .collect();
+
+            // 计算统计学特征，只保留一个数值
+            investor_returns.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            let mean: f64 = investor_returns.iter().sum::<f64>() / investor_count as f64;
+            let percentile10 = investor_returns[investor_count / 10];
+            let percentile90 = investor_returns[investor_count * 9 / 10];
+
+            DataItem {
+                date: day_name.to_string(),
+                value: mean,
+                low: percentile10,
+                up: percentile90,
+            }
+        })
+        .collect();
 
     Ok(data)
 }

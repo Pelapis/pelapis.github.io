@@ -1,4 +1,4 @@
-/* 页面布局 */
+/* 0级组件 */
 body {
     display: grid;
     grid-template-columns: minmax(1fr, 1500px);
@@ -8,7 +8,7 @@ body {
     background-color: #f0f0f0;
 }
 
-/* 一级组件 */
+/* 1级组件 */
 header {
     background-color: #333;
     color: #fff;
@@ -16,7 +16,7 @@ header {
     text-align: center;
 }
 
-aside {
+nav {
     display: grid;
     grid-template-columns: min-content;
     grid-auto-rows: min-content;
@@ -31,7 +31,7 @@ aside {
     box-shadow: 0 0 5px 0 #000;
 }
 
-#figures {
+main {
     display: grid;
 
     grid-template-rows: repeat(3, auto);
@@ -45,7 +45,7 @@ footer {
     text-align: center;
 }
 
-/* 组件细节 */
+/* 2级组件 */
 figure {
     justify-content: space-evenly;
     align-items: center;
@@ -58,10 +58,10 @@ figure {
     transition: 0.3s;
 }
 
-figure div {
+canvas {
     display: grid;
-    width: 90vw;
-    max-width: 900px;
+    width: 80vw;
+    max-width: 800px;
     height: 60vw;
     max-height: 600px;
     justify-content: center;
@@ -75,7 +75,7 @@ figure figcaption {
     margin: 1em 0 0;
 }
 
-aside button {
+nav button {
     background-color: inherit;
     padding: 0.5em 1em;
     border: none;
@@ -88,13 +88,12 @@ aside button {
     width: 100px;
 }
 
-aside button:hover {
+nav button:hover {
     background-color: #333;
     color: #fff;
 }
 
-.active,
-aside button:active {
+nav button:active, .active {
     background-color: #666;
     color: #fff;
 }
@@ -104,6 +103,6 @@ a {
     text-decoration: none;
 }
 
-h3, h6 {
+* {
     text-align: center;
 }

@@ -4,12 +4,12 @@ use gloo::events::EventListener;
 use gloo::timers::future::sleep;
 use gloo::{dialogs::alert, utils::window};
 use rand::random;
-use web_sys::KeyboardEvent;
 use std::time::Duration;
+use web_sys::KeyboardEvent;
 use web_sys::{wasm_bindgen::JsCast, CanvasRenderingContext2d, HtmlCanvasElement};
 
 // 设定画布的宽高，以及网格的行列数
-const WIDTH: u32 = 380;
+const WIDTH: u32 = 380 * 2;
 const HEIGHT: u32 = WIDTH;
 const CELL_COUNT: usize = 17;
 
@@ -32,7 +32,8 @@ pub fn Snake() -> Element {
     let mut canvas: Signal<Option<std::rc::Rc<MountedData>>> = use_signal(move || None);
 
     let world = use_memo(move || {
-        let mut world = vec![vec![WorldStates::None; CELL_COUNT as usize]; CELL_COUNT as usize];
+        let mut world: Vec<Vec<WorldStates>> =
+            vec![vec![WorldStates::None; CELL_COUNT as usize]; CELL_COUNT as usize];
         for (x, y) in snake().iter() {
             world[*x as usize][*y as usize] = WorldStates::Snake;
         }
@@ -165,40 +166,57 @@ pub fn Snake() -> Element {
         if new_direction != current_direction().reverse() {
             current_direction.set(new_direction);
         }
-    }).forget();
+    })
+    .forget();
 
     rsx! {
         header {
             h1 { "贪吃蛇" }
         }
         h3 { "得分：{snake().len() - 3}" }
-        main { ontouchend: move |event| async move {
-                let touch = event.data().touches_changed().get(0).unwrap().client_coordinates().to_tuple();
-
-                let origin = canvas().expect("canvas is not mounted").get_client_rect().await.unwrap().origin;
+        main {
+            ontouchend: move |event| async move {
+                let touch = event
+                    .data()
+                    .touches_changed()
+                    .get(0)
+                    .unwrap()
+                    .client_coordinates()
+                    .to_tuple();
+                let origin = canvas()
+                    .expect("canvas is not mounted")
+                    .get_client_rect()
+                    .await
+                    .unwrap()
+                    .origin;
                 let x = touch.0 - origin.x;
                 let y = touch.1 - origin.y;
-
-                // 利用对角线方程，判断点击的位置
                 let direction = match (y > x, y > HEIGHT as f64 - x) {
                     (false, false) => Directions::Up,
                     (true, false) => Directions::Left,
                     (true, true) => Directions::Down,
                     (false, true) => Directions::Right,
                 };
-
-                if direction != current_direction() && direction != current_direction().reverse()  {
+                if direction != current_direction() && direction != current_direction().reverse()
+                {
                     current_direction.set(direction);
                 }
             },
-            canvas { width: WIDTH as f64, height: HEIGHT as f64, onmounted: move |element| async move {
-                canvas.set(Some(element.data()));
-            }, }
+            canvas {
+                style: format!("width: {}px; height: {}px;", WIDTH / 2, HEIGHT / 2),
+                width: WIDTH as f64,
+                height: HEIGHT as f64,
+                onmounted: move |element| async move {
+                    canvas.set(Some(element.data()));
+                }
+            }
         }
         h6 { "手机：点击画面上下左右" }
         h6 { "电脑：W A S D 键或上下左右键" }
         footer {
-            "Made by Cavendish. Back to  " Link { to: Route::Home {}, "Home" } "."
+            "Made by Cavendish. Back to  "
+            Link { to: Route::Home {}, "Home" }
+            "."
         }
     }
 }
