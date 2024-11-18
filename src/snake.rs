@@ -128,7 +128,7 @@ pub fn Snake() -> Element {
             // 判断是否撞到蛇身或墙壁
             for (x, y) in new_snake.iter() {
                 if new_head == (*x, *y) || will_hit_wall {
-                    alert(format!("游戏结束！您的得分是：{}！", new_snake.len()).as_str());
+                    alert(format!("游戏结束！您的得分是：{}！", snake().len() - 3).as_str());
                     window().location().reload().unwrap();
                     return;
                 }
