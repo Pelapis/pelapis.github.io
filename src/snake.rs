@@ -170,11 +170,7 @@ pub fn Snake() -> Element {
     .forget();
 
     rsx! {
-        header {
-            h1 { "贪吃蛇" }
-        }
-        h3 { "得分：{snake().len() - 3}" }
-        main {
+        body {
             ontouchend: move |event| async move {
                 let touch = event
                     .data()
@@ -202,21 +198,27 @@ pub fn Snake() -> Element {
                     current_direction.set(direction);
                 }
             },
-            canvas {
-                style: format!("width: {}px; height: {}px;", WIDTH / 2, HEIGHT / 2),
-                width: WIDTH as f64,
-                height: HEIGHT as f64,
-                onmounted: move |element| async move {
-                    canvas.set(Some(element.data()));
-                }
+            header {
+                h1 { "贪吃蛇" }
             }
-        }
-        h6 { "手机：点击画面上下左右" }
-        h6 { "电脑：W A S D 键或上下左右键" }
-        footer {
-            "Made by Cavendish. Back to  "
-            Link { to: Route::Home {}, "Home" }
-            "."
+            main {
+                h3 { "得分：{snake().len() - 3}" }
+                canvas {
+                    style: format!("width: {}px; height: {}px;", WIDTH / 2, HEIGHT / 2),
+                    width: WIDTH as f64,
+                    height: HEIGHT as f64,
+                    onmounted: move |element| async move {
+                        canvas.set(Some(element.data()));
+                    }
+                }
+                h6 { "手机：点击画面上下左右" }
+                h6 { "电脑：W A S D 键或上下左右键" }
+            }
+            footer {
+                "Made by Cavendish. Back to  "
+                Link { to: Route::Home {}, "Home" }
+                "."
+            }
         }
     }
 }

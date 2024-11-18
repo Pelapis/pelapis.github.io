@@ -67,10 +67,8 @@ fn Home() -> Element {
             }
         }
         main { id: "figures",
-            figure {
-                Chart { stock }
-                figcaption { "中水平组😐（正确率0.5）" }
-            }
+            Chart { stock }
+            figcaption { "中水平组😐（正确率0.5）" }
         }
         footer {
             p {
