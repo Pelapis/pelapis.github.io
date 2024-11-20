@@ -129,7 +129,7 @@ pub fn Snake() -> Element {
             for (x, y) in new_snake.iter() {
                 if new_head == (*x, *y) || will_hit_wall {
                     alert(format!("游戏结束！您的得分是：{}！", snake().len() - 3).as_str());
-                    window().location().reload().unwrap();
+                    navigator().push(Route::Home {});
                     return;
                 }
             }
