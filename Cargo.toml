@@ -8,11 +8,11 @@ edition = "2021"
 
 [dependencies]
 
-dioxus = { version = "0.6.0-alpha.5", features = ["web", "router", "html"] }
-gloo = { version = "0.11.0", features = ["futures"]}
-rand = "0.8.5"
-serde = "1.0.213"
-web-sys = { version = "0.3.72", features = [
+dioxus = { version = "^0.6.0-rc.0", features = ["web", "router",] }
+gloo = { version = "^0.11.0", features = ["futures"]}
+rand = "^0.8.5"
+serde = "^1.0.215"
+web-sys = { version = "^0.3.74", features = [
     "HtmlCanvasElement",
     "CanvasRenderingContext2d",
     "HtmlElement",
@@ -20,8 +20,8 @@ web-sys = { version = "0.3.72", features = [
     "TouchList",
     "Touch",
 ] }
-plotters = "0.3.7"
-plotters-canvas = "0.3.0"
+plotters = "^0.3.7"
+plotters-canvas = "^0.3.0"
 
 [patch.crates-io]
 plotters-canvas = { git = "https://github.com/plotters-rs/plotters-canvas.git", branch = "dependabot/add-v2-config-file" }
