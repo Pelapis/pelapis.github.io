@@ -1,223 +1,136 @@
-#![allow(non_snake_case)]
-
-mod snake;
+mod cases;
+mod games;
+mod home;
+use cases::{Cases, Invest};
+use games::{Games, Snake};
+use home::Home;
 
 use dioxus::prelude::*;
-use gloo::net::http::Request;
-use plotters::prelude::*;
-use plotters_canvas::CanvasBackend;
-use rand::random;
-use serde::{Deserialize, Serialize};
-use snake::Snake;
 
-const DAYS: [(usize, &str); 10] = [
-    (1, "1天"),
-    (2, "2天"),
-    (3, "3天"),
-    (5, "1周"),
-    (10, "2周"),
-    (21, "1月"),
-    (63, "1季"),
-    (250, "1年"),
-    (1250, "5年"),
-    (2500, "10年"),
-];
+fn main() {
+    dioxus::LaunchBuilder::new()
+        // // Set the server config only if we are building the server target
+        // .with_cfg(server_only! {
+        //     ServeConfig::builder()
+        //         // Enable incremental rendering
+        //         .incremental(
+        //             IncrementalRendererConfig::new()
+        //                 // Store static files in the public directory where other static assets like wasm are stored
+        //                 .static_dir(
+        //                     std::env::current_exe()
+        //                         .unwrap()
+        //                         .parent()
+        //                         .unwrap()
+        //                         .join("public")
+        //                 )
+        //                 // Don't clear the public folder on every build. The public folder has other files including the wasm
+        //                 // binary and static assets required for the app to run
+        //                 .clear_cache(false)
+        //         )
+        //         .enable_out_of_order_streaming()
+        // })
+        .launch(Layout);
+}
 
-#[derive(Clone, Routable, Debug, PartialEq)]
+#[component]
+fn Layout() -> Element {
+    rsx! {
+        document::Title { "个人主页" }
+        document::Stylesheet { href: "/assets/tailwind.css" }
+
+        div { class: "navbar bg-base-100 shadow-sm",
+            div { class: "navbar-start" }
+            div { class: "navbar-center",
+                a { class: "btn btn-ghost text-xl", href: "/", "个人主页" }
+            }
+            div { class: "navbar-end" }
+        }
+
+        div { class: "flex flex-row",
+            ul { class: "menu bg-base-200 rounded-box w-56",
+                li {
+                    a { href: "/",
+                        svg {
+                            xmlns: "http://www.w3.org/2000/svg",
+                            "viewBox": "0 0 24 24",
+                            fill: "none",
+                            stroke: "currentColor",
+                            class: "h-5 w-5",
+                            path {
+                                "stroke-linejoin": "round",
+                                "stroke-width": "2",
+                                "stroke-linecap": "round",
+                                d: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
+                            }
+                        }
+                        "主页"
+                    }
+                }
+                li {
+                    a { href: "/cases",
+                        svg {
+                            xmlns: "http://www.w3.org/2000/svg",
+                            fill: "none",
+                            stroke: "currentColor",
+                            "viewBox": "0 0 24 24",
+                            class: "h-5 w-5",
+                            path {
+                                "stroke-width": "2",
+                                "stroke-linejoin": "round",
+                                "stroke-linecap": "round",
+                                d: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                            }
+                        }
+                        "案例集"
+                    }
+                }
+                li {
+                    a { href: "/games",
+                        svg {
+                            xmlns: "http://www.w3.org/2000/svg",
+                            fill: "none",
+                            stroke: "currentColor",
+                            "viewBox": "0 0 24 24",
+                            class: "h-5 w-5",
+                            path {
+                                "stroke-linecap": "round",
+                                d: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
+                                "stroke-width": "2",
+                                "stroke-linejoin": "round",
+                            }
+                        }
+                        "游戏集"
+                    }
+                }
+            }
+            Router::<Route> {}
+        }
+    }
+}
+
+#[rustfmt::skip]
+#[derive(Routable, Clone)]
 enum Route {
     #[route("/")]
     Home {},
-    #[route("/snake")]
-    Snake {},
+    #[nest("/cases")]
+        #[route("/")]
+        Cases {},
+        #[route("/invest")]
+        Invest {},
+    #[end_nest]
+    #[nest("/games")]
+        #[route("/")]
+        Games {},
+        #[route("/snake")]
+        Snake {},
 }
 
-fn main() {
-    launch(move || {
-        rsx! {
-            document::Stylesheet { href: asset!("/assets/style.css") }
-            Router::<Route> {}
-        }
-    });
-}
-
-#[component]
-fn Home() -> Element {
-    let mut stock = use_signal(move || 0);
-
-    rsx! {
-        header {
-            h1 { "投资模拟" }
-            p { "沪深300指数，贵州茅台 和 梦洁股份" }
-        }
-        nav {
-            button {
-                onclick: move |_| stock.set(0),
-                class: if stock() == 0 { "active" } else { "" },
-                "沪深300"
-            }
-            button {
-                onclick: move |_| stock.set(1),
-                class: if stock() == 1 { "active" } else { "" },
-                "贵州茅台"
-            }
-            button {
-                onclick: move |_| stock.set(2),
-                class: if stock() == 2 { "active" } else { "" },
-                "梦洁股份"
-            }
-        }
-        main { id: "figures",
-            Chart { stock }
-            figcaption { "中水平组😐（正确率0.5）" }
-        }
-        footer {
-            p {
-                "Made by "
-                strong { "Cavendish" }
-                ". The source code is on "
-                a { href: "https://github.com/Pelapis/invest-simulation", "GitHub" }
-                "."
-            }
-            // 链接到贪吃蛇小游戏
-            Link { to: Route::Snake {}, "贪吃蛇🐍小游戏" }
-        }
-    }
-}
-
-#[component]
-fn Chart(stock: Signal<usize>) -> Element {
-    let plot_resource = use_resource(move || async move {
-        let paths = vec![
-            "assets/data/data_index.csv".to_string(),
-            "assets/data/data_maotai.csv".to_string(),
-            "assets/data/data_mengjie.csv".to_string(),
-        ];
-        let data = compute_data(paths[stock()].clone()).await.unwrap();
-
-        let draw_area = CanvasBackend::new("chart").unwrap().into_drawing_area();
-        draw_area.fill(&WHITE).unwrap();
-        let mut chart = ChartBuilder::on(&draw_area)
-            .caption("收益-持有期曲线图", ("sans-serif", 40).into_font())
-            .margin_right(40)
-            .x_label_area_size(60)
-            .y_label_area_size(80)
-            .build_cartesian_2d(0usize..9, -1.0..12.0)
-            .unwrap();
-        chart
-            .configure_mesh()
-            .label_style(("sans-serif", 24).into_font())
-            .x_label_formatter(&|x| DAYS[*x].1.to_string())
-            .draw()
-            .unwrap();
-
-        // 绘制曲线
-        chart
-            .draw_series(LineSeries::new(
-                data.iter().enumerate().map(|(i, item)| (i, item.value)),
-                BLACK.stroke_width(3),
-            ))
-            .unwrap();
-
-        // 绘制误差区间
-        let points = data
-            .iter()
-            .enumerate()
-            .map(|(i, item)| (i, item.low))
-            .chain(data.iter().enumerate().rev().map(|(i, item)| (i, item.up)))
-            .collect::<Vec<_>>();
-        let polygon = Polygon::new(points, &BLACK.mix(0.2));
-        chart.plotting_area().draw(&polygon).unwrap();
-
-        draw_area.present().unwrap();
-    });
-
-    rsx! {
-        canvas {
-            class: "plot",
-            id: "chart",
-            width: 800 * 2,
-            height: 600 * 2,
-            match plot_resource() {
-                None => "正在计算数据...",
-                Some(_) => { "计算完成，正在绘制图表..." },
-            }
-        }
-    }
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug)]
-struct DataItem {
-    date: String,
-    value: f64,
-    low: f64,
-    up: f64,
-}
-
-async fn request_data(path: String) -> String {
-    Request::get(&path)
-        .send()
-        .await
-        .unwrap()
-        .text()
-        .await
-        .unwrap()
-}
-
-async fn compute_data(path: String) -> Result<Vec<DataItem>, Box<dyn std::error::Error>> {
-    let investor_count: usize = 100;
-    let trading_cost: f64 = 0.001;
-    let level: f64 = 0.5;
-    let participation: f64 = 0.5;
-
-    // 数据预处理
-    let text = request_data(path).await;
-    let return_vector: Vec<f64> = text
-        .lines()
-        .filter_map(|line| line.split(',').nth(2)?.parse::<f64>().ok())
-        .collect();
-
-    // 计算数据
-    let data: Vec<DataItem> = DAYS
-        .iter()
-        .map(|(hold_day, day_name)| {
-            let hold_count = return_vector.len().div_ceil(*hold_day);
-            let adjusted_returns: Vec<f64> = (0..hold_count)
-                .map(|j| {
-                    return_vector[j * hold_day..return_vector.len().min((j + 1) * hold_day)]
-                        .iter()
-                        .product()
-                })
-                .collect();
-
-            // 计算各投资者的最终收益率
-            let mut investor_returns: Vec<f64> = (0..investor_count)
-                .map(|_| {
-                    adjusted_returns.iter().fold(1., |acc, &this_return| {
-                        let is_growing = this_return > 1.;
-                        let will_win = level > random::<f64>();
-                        let will_participate = participation > random::<f64>();
-                        if (is_growing == will_win) && will_participate {
-                            return acc * this_return * (1. - trading_cost);
-                        }
-                        acc
-                    })
-                })
-                .collect();
-
-            // 计算统计学特征，只保留一个数值
-            investor_returns.sort_by(|a, b| a.partial_cmp(b).unwrap());
-            let mean: f64 = investor_returns.iter().sum::<f64>() / investor_count as f64;
-            let percentile10 = investor_returns[investor_count / 10];
-            let percentile90 = investor_returns[investor_count * 9 / 10];
-
-            DataItem {
-                date: day_name.to_string(),
-                value: mean,
-                low: percentile10,
-                up: percentile90,
-            }
-        })
-        .collect();
-
-    Ok(data)
-}
+// #[server(endpoint = "static_routes")]
+// async fn static_routes() -> Result<Vec<String>, ServerFnError> {
+//     // The `Routable` trait has a `static_routes` method that returns all static routes in the enum
+//     Ok(Route::static_routes()
+//         .iter()
+//         .map(ToString::to_string)
+//         .collect())
+// }

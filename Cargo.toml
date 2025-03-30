@@ -1,27 +1,26 @@
 [package]
-name = "dioxus-test"
-version = "0.1.0"
 authors = ["Flightless <pelapi@qq.com>"]
 edition = "2021"
+name = "dioxus-page"
+version = "0.2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 
-dioxus = { version = "^0.6.0-rc.0", features = ["web", "router",] }
-gloo = { version = "^0.11.0", features = ["futures"]}
-rand = "^0.8.5"
-serde = "^1.0.215"
-web-sys = { version = "^0.3.74", features = [
-    "HtmlCanvasElement",
-    "CanvasRenderingContext2d",
-    "HtmlElement",
-    "TouchEvent",
-    "TouchList",
-    "Touch",
-] }
-plotters = "^0.3.7"
-plotters-canvas = "^0.3.0"
+dioxus = {version = "0.6.3", features = ["router", "fullstack"]}
+futures = "0.3.31"
+reqwest = "0.12.15"
+serde = "1.0.219"
 
-[patch.crates-io]
-plotters-canvas = { git = "https://github.com/plotters-rs/plotters-canvas.git", branch = "dependabot/add-v2-config-file" }
+[profile]
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"
