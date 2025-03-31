@@ -13,6 +13,13 @@ futures = "0.3.31"
 reqwest = "0.12.15"
 serde = "1.0.219"
 
+[features]
+default = ["web"]
+desktop = ["dioxus/desktop"]
+mobile = ["dioxus/mobile"]
+ssg = []
+web = ["dioxus/web"]
+
 [profile]
 
 [profile.wasm-dev]
