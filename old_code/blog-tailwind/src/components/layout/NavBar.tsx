@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router'
+import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
 
 export default function NavBar() {
