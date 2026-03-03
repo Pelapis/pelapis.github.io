@@ -23,43 +23,22 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
             title: '猫抓鱼小游戏',
             description: '经典的猫抓鱼游戏',
             type: 'game',
-            placeholder: true
+            placeholder: false
         },
         {
             id: 'snake',
             title: '贪吃蛇游戏',
             description: '经典贪吃蛇小游戏',
             type: 'game',
-            placeholder: true
+            placeholder: false
         },
         {
-            id: 'tetris',
-            title: '俄罗斯方块',
-            description: '经典俄罗斯方块游戏',
-            type: 'game',
-            placeholder: true
+            id: 'invest',
+            title: '投资模拟',
+            description: '模拟投资项目的收益和风险',
+            type: 'other',
+            placeholder: false
         },
-        {
-            id: 'memory',
-            title: '记忆翻牌',
-            description: '锻炼记忆力的翻牌游戏',
-            type: 'game',
-            placeholder: true
-        },
-        {
-            id: 'calculator',
-            title: '计算器',
-            description: '功能完善的计算器工具',
-            type: 'tool',
-            placeholder: true
-        },
-        {
-            id: 'weather',
-            title: '天气查询',
-            description: '实时天气信息查询',
-            type: 'tool',
-            placeholder: true
-        }
     ],
     currentProject: null,
     getProjectById: (id: string) => {
