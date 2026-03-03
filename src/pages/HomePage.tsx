@@ -30,7 +30,7 @@ export default function HomePage() {
                             <h3 className="text-[1.1rem] font-bold text-gray-800 mb-2">{project.title}</h3>
                             <p className="text-gray-600 mb-3 text-[0.95rem]">{project.description}</p>
                             <Link
-                                to={`/project/${project.id}`}
+                                to={`/${project.id}`}
                                 className="text-primary font-medium text-[0.95rem] hover:underline"
                             >
                                 立即体验 →

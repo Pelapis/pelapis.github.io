@@ -2,14 +2,14 @@ import { createBrowserRouter } from 'react-router'
 import AppLayout from '../components/layout/AppLayout'
 import HomePage from '../pages/HomePage'
 import AboutPage from '../pages/AboutPage'
+import CatGamePage from '../features/catgame/CatGamePage'
 
 export const router = createBrowserRouter([
     {
-        path: '/',
         element: <AppLayout />,
         children: [
             {
-                index: true,
+                path: '/',
                 element: <HomePage />
             },
             {
@@ -17,5 +17,9 @@ export const router = createBrowserRouter([
                 element: <AboutPage />
             }
         ]
+    },
+    {
+        path: 'catgame',
+        element: <CatGamePage />
     }
 ])

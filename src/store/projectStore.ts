@@ -19,7 +19,14 @@ interface ProjectState {
 export const useProjectStore = create<ProjectState>((set, get) => ({
     projects: [
         {
-            id: 'snake-game',
+            id: 'catgame',
+            title: '猫抓鱼小游戏',
+            description: '经典的猫抓鱼游戏',
+            type: 'game',
+            placeholder: true
+        },
+        {
+            id: 'snake',
             title: '贪吃蛇游戏',
             description: '经典贪吃蛇小游戏',
             type: 'game',
@@ -33,7 +40,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
             placeholder: true
         },
         {
-            id: 'memory-game',
+            id: 'memory',
             title: '记忆翻牌',
             description: '锻炼记忆力的翻牌游戏',
             type: 'game',
