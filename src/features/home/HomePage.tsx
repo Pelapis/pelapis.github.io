@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { useProjectStore } from '../store/projectStore'
+import { useProjectStore } from '../../store/projectStore'
 
 export default function HomePage() {
     const { projects } = useProjectStore()

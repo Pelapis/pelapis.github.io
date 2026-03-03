@@ -1,5 +1,5 @@
 import { SnakeGame } from './components/game/SnakeGame'
 
-export default function App() {
+export default function SnakeGamePage() {
   return <SnakeGame />
 }
