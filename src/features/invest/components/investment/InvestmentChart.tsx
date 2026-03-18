@@ -46,24 +46,30 @@ export function InvestmentChart() {
         <AreaChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-          <YAxis tick={{ fontSize: 12 }} />
-          <Tooltip />
+          <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `${((value - 1) * 100).toFixed(0)}%`} />
+          <Tooltip
+            formatter={(value: number, name: string) => [`${((value - 1) * 100).toFixed(1)}%`, name]}
+            labelFormatter={(label) => `日期: ${label}`}
+          />
           <Legend />
           <Area
+            connectNulls
+            type="monotone"
+            dataKey="low"
+            stackId="1"
+            stroke="#82ca9d"
+            fill="transparent"
+            name="10%分位数"
+          />
+          <Area
+            connectNulls
             type="monotone"
             dataKey="up"
+            stackId="1"
             stroke="#8884d8"
             fill="#8884d8"
             fillOpacity={0.2}
             name="90%分位数"
-          />
-          <Area
-            type="monotone"
-            dataKey="low"
-            stroke="#82ca9d"
-            fill="#82ca9d"
-            fillOpacity={0.2}
-            name="10%分位数"
           />
           <Line type="monotone" dataKey="value" stroke="#000000" strokeWidth={3} name="平均收益" />
         </AreaChart>

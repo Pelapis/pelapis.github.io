@@ -85,9 +85,9 @@ export function computeData(returnVector: number[]): DataItem[] {
 
 export async function fetchAndComputeData(stockType: 'index' | 'maotai' | 'mengjie'): Promise<DataItem[]> {
   const paths: Record<string, string> = {
-    index: '/data/data_index.csv',
-    maotai: '/data/data_maotai.csv',
-    mengjie: '/data/data_mengjie.csv',
+    index: new URL('../assets/data/data_index.csv', import.meta.url).toString(),
+    maotai: new URL('../assets/data/data_maotai.csv', import.meta.url).toString(),
+    mengjie: new URL('../assets/data/data_mengjie.csv', import.meta.url).toString(),
   }
 
   const text = await requestCSVData(paths[stockType])
