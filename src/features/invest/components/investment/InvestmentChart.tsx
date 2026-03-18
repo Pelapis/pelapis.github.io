@@ -48,7 +48,7 @@ export function InvestmentChart() {
           <XAxis dataKey="name" tick={{ fontSize: 12 }} />
           <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `${((value - 1) * 100).toFixed(0)}%`} />
           <Tooltip
-            formatter={(value: number, name: string) => [`${((value - 1) * 100).toFixed(1)}%`, name]}
+            formatter={(value, name) => [`${(((value as number) - 1) * 100).toFixed(1)}%`, name as string]}
             labelFormatter={(label) => `日期: ${label}`}
           />
           <Legend />
