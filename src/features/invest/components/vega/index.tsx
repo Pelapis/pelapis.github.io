@@ -37,7 +37,7 @@ export default function VegaChart() {
         (async () => {
             const vals = await Promise.all(DAYS.map(
                 async ([val, _]) => {
-                    const plotdata = await workerApi.compute_data(val, `../../assets/data/data_${stock}.csv`)
+                    const plotdata = await workerApi.compute_data(val, new URL(`../../assets/data/data_${stock}.csv`, import.meta.url).href)
 
                     return {
                         days: val,
