@@ -1,6 +1,6 @@
 import { StockSelector } from './components/investment/StockSelector'
-import { InvestmentChart } from './components/investment/InvestmentChart'
-import Vega from './components/vega'
+// import { InvestmentChart } from './components/investment/InvestmentChart'
+import VegaChart from './components/vega'
 
 export default function InvestmentPage() {
   return (
@@ -11,9 +11,12 @@ export default function InvestmentPage() {
       </header>
       <StockSelector />
       <main className="mt-6">
-        <InvestmentChart />
+        <VegaChart />
       </main>
-      <Vega />
+
+      {/* <main className="mt-6">
+        <InvestmentChart />
+      </main> */}
     </div>
   )
 }
