@@ -1,5 +1,5 @@
-import type { StockType } from '../../store/investStore'
-import { stockAtom } from '../../store/investStore'
+import type { StockType } from '../store/investStore'
+import { stockAtom } from '../store/investStore'
 import { useAtom } from 'jotai'
 
 
