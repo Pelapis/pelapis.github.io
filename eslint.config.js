@@ -1,23 +1,29 @@
+// @ts-check
 import js from '@eslint/js'
 import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
-import { defineConfig, globalIgnores } from 'eslint/config'
 
-export default defineConfig([
-  globalIgnores(['dist']),
+export default tseslint.config(
   {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
+    ignores: [
+      '.next/**',
+      'docs/**',
+      'node_modules/**',
+      'next-env.d.ts',
+      'src/features/invest/components/vega/wasm/**',
     ],
+  },
+  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      ecmaVersion: 2022,
+      globals: {
+        ...globals.browser,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
-])
+)

@@ -1,9 +1,12 @@
-import { Link, useLocation } from 'react-router'
+"use client"
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useState, useEffect, useCallback } from 'react'
 
 export default function NavBar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
-    const location = useLocation()
+    const pathname = usePathname()
 
     const closeMenu = useCallback(() => {
         setIsMenuOpen(false)
@@ -29,13 +32,13 @@ export default function NavBar() {
         }
     }, [])
 
-    useEffect(() => closeMenu(), [location.pathname, closeMenu])
+    useEffect(() => closeMenu(), [pathname, closeMenu])
 
     return (
         <header className="bg-white shadow-[0_2px_4px_rgba(0,0,0,0.1)] sticky top-0 z-50">
             <div className="max-w-[1200px] mx-auto px-4 py-4 flex justify-between items-center">
                 <Link
-                    to="/"
+                    href="/"
                     className="text-2xl font-bold text-gray-800 no-underline hover:text-gray-800"
                     onClick={closeMenu}
                 >
@@ -56,15 +59,15 @@ export default function NavBar() {
 
                 <nav className={`flex gap-8 ${isMenuOpen ? 'absolute top-full left-0 right-0 bg-white flex-col p-4 gap-4 shadow-[0_4px_6px_rgba(0,0,0,0.1)]' : 'hidden md:flex'}`}>
                     <Link
-                        to="/"
-                        className="text-gray-600 no-underline font-medium transition-colors hover:text-primary"
+                        href="/"
+                        className={`no-underline font-medium transition-colors hover:text-primary ${pathname === '/' ? 'text-primary' : 'text-gray-600'}`}
                         onClick={closeMenu}
                     >
                         首页
                     </Link>
                     <Link
-                        to="/about"
-                        className="text-gray-600 no-underline font-medium transition-colors hover:text-primary"
+                        href="/about"
+                        className={`no-underline font-medium transition-colors hover:text-primary ${pathname === '/about' ? 'text-primary' : 'text-gray-600'}`}
                         onClick={closeMenu}
                     >
                         关于

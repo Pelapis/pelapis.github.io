@@ -1,75 +1,55 @@
-# React + TypeScript + Vite
+# 个人博客 (Next.js)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+基于 React + TypeScript + Next.js (App Router) + Tailwind CSS 4 + Zustand + Jotai 的个人博客与项目展示站点。
 
-Currently, two official plugins are available:
+## 功能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **首页**:项目作品展示卡片
+- **猫抓鱼小游戏** (`/catgame`):经典触屏小游戏,多主题切换
+- **贪吃蛇游戏** (`/snake`):Canvas 实现,键盘/按钮操控
+- **投资模拟** (`/invest`):Rust WASM + Comlink Web Worker + Vega-Lite 可视化,展示不同持有期的收益分布
 
-## React Compiler
+## 技术栈
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+| 类别 | 技术 |
+|------|------|
+| 框架 | Next.js 15 (App Router, 静态导出) |
+| UI | React 19, Tailwind CSS 4 |
+| 状态 | Zustand, Jotai |
+| 可视化 | Vega-Lite, vega-embed |
+| 计算 | Rust → WebAssembly (Comlink + Web Worker) |
+| 语言 | TypeScript |
 
-Note: This will impact Vite dev & build performances.
+## 开发
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+bun install
+bun run dev      # 开发服务器 http://localhost:3000
+bun run build    # 静态导出到 docs/
+bun run lint     # ESLint 检查
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 部署
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+推送到 `nextjs` 分支后,GitHub Actions 自动构建并把 `docs/` 静态产物发布到 GitHub Pages。
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 目录结构
+
+```
+src/
+├── app/                 # App Router 路由
+│   ├── layout.tsx       # 根布局(元数据、全局样式)
+│   ├── page.tsx         # 首页
+│   ├── about/           # 关于页
+│   ├── catgame/         # 猫抓鱼(客户端组件)
+│   ├── snake/           # 贪吃蛇(客户端组件)
+│   └── invest/          # 投资模拟(server page + client 组件)
+├── components/layout/   # 主站布局(NavBar / Footer)
+├── features/            # 功能模块
+│   ├── catgame/         # 猫抓鱼游戏
+│   ├── snake/           # 贪吃蛇游戏
+│   └── invest/          # 投资模拟(WASM + Worker + Vega)
+└── store/               # Zustand 全局状态
+public/
+└── invest/              # CSV 数据与 WASM 二进制(运行时 fetch)
 ```

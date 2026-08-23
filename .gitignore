@@ -26,3 +26,6 @@ archive
 *.njsproj
 *.sln
 *.sw?
+# Next.js
+.next/
+out/

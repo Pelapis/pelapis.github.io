@@ -1,9 +1,7 @@
-import { Link } from 'react-router'
-import { useProjectStore } from '../../store/projectStore'
+import Link from 'next/link'
+import { projects } from '../../store/projectStore'
 
 export default function HomePage() {
-    const { projects } = useProjectStore()
-
     return (
         <div className="flex flex-col gap-4">
             <section className="text-center py-6">
@@ -30,7 +28,7 @@ export default function HomePage() {
                             <h3 className="text-[1.1rem] font-bold text-gray-800 mb-2">{project.title}</h3>
                             <p className="text-gray-600 mb-3 text-[0.95rem]">{project.description}</p>
                             <Link
-                                to={`/${project.id}`}
+                                href={`/${project.id}`}
                                 className="text-primary font-medium text-[0.95rem] hover:underline"
                             >
                                 立即体验 →

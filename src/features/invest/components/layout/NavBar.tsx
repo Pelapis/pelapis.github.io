@@ -1,11 +1,14 @@
-import { Link, useLocation } from 'react-router'
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const navItems = [
   { path: '/', label: '投资模拟' },
 ]
 
 export function NavBar() {
-  const location = useLocation()
+  const pathname = usePathname()
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -15,9 +18,9 @@ export function NavBar() {
             {navItems.map((item) => (
               <Link
                 key={item.path}
-                to={item.path}
+                href={item.path}
                 className={`text-sm font-medium transition-colors duration-200 ${
-                  location.pathname === item.path
+                  pathname === item.path
                     ? 'text-blue-600'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}

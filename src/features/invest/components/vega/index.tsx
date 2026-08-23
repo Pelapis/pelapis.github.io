@@ -1,6 +1,7 @@
+'use client'
+
 import type { WorkerApi } from './worker'
 import { wrap } from 'comlink'
-import MyWorker from './worker?worker'
 import { useEffect, useRef } from 'react'
 import embed from 'vega-embed'
 import { stockAtom } from '../../store/investStore'
@@ -25,14 +26,13 @@ export default function VegaChart() {
 
     useEffect(() => {
         if (!chartRef.current) return
-
-        const worker = new MyWorker();
+        const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
         const workerApi = wrap<WorkerApi>(worker);
 
         (async () => {
             const vals = await Promise.all(Object.keys(DAY_DICT).map(
                 async (val) => {
-                    const plotdata = await workerApi.compute_data(Number(val), new URL(`../../assets/data/data_${stock}.csv`, import.meta.url).href)
+                    const plotdata = await workerApi.compute_data(Number(val), `/invest/data_${stock}.csv`)
 
                     return {
                         days: Number(val),
@@ -47,7 +47,7 @@ export default function VegaChart() {
                 }
             ))
 
-            const rst = await embed(chartRef.current!, {
+            await embed(chartRef.current!, {
                 data: { values: vals },
                 config: { customFormatTypes: true },
                 width: 'container',
@@ -96,7 +96,6 @@ export default function VegaChart() {
                     showTimeLabel: (datum: number) => DAY_DICT[datum]
                 }
             })
-            rst.view
         })();
 
         return () => {

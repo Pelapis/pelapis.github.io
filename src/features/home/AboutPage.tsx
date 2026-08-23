@@ -18,7 +18,7 @@ export default function AboutPage() {
                             我热爱编程，喜欢开发各种有趣的应用和游戏。
                         </p>
                         <p className="text-gray-600 leading-[1.8] mb-4">
-                            这个博客使用现代前端技术构建，包括 React、TypeScript、Zustand 和 Vite。
+                            这个博客使用现代前端技术构建，包括 React、TypeScript、Zustand 和 Next.js。
                             所有项目都采用响应式设计，支持移动端和桌面端访问。
                         </p>
                     </div>
@@ -31,7 +31,7 @@ export default function AboutPage() {
                             { icon: '⚡', name: 'React' },
                             { icon: '📘', name: 'TypeScript' },
                             { icon: '🗃️', name: 'Zustand' },
-                            { icon: '🚀', name: 'Vite' },
+                            { icon: '▲', name: 'Next.js' },
                             { icon: '🎨', name: 'Tailwind CSS' },
                             { icon: '📱', name: 'PWA' },
                         ].map(tech => (
