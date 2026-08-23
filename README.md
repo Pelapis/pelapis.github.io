@@ -1,13 +1,14 @@
 # 个人博客 (Next.js)
 
-基于 React + TypeScript + Next.js (App Router) + Tailwind CSS 4 + Zustand + Jotai 的个人博客与项目展示站点。
+基于 React + TypeScript + Next.js (App Router) + Tailwind CSS 4 + Jotai 的个人博客与项目展示站点。
 
 ## 功能
 
-- **首页**:项目作品展示卡片
-- **猫抓鱼小游戏** (`/catgame`):经典触屏小游戏,多主题切换
-- **贪吃蛇游戏** (`/snake`):Canvas 实现,键盘/按钮操控
-- **投资模拟** (`/invest`):Rust WASM + Comlink Web Worker + Vega-Lite 可视化,展示不同持有期的收益分布
+- **首页** (`/`):项目作品展示卡片
+- **关于** (`/about`):博主与技术栈介绍
+- **猫抓鱼小游戏** (`/catgame`):触屏小游戏,难度/模式/主题可切换(设置持久化)
+- **贪吃蛇游戏** (`/snake`):Canvas 实现,键盘/触屏操控
+- **投资模拟** (`/invest`):Rust WASM + kkrpc Web Worker + Vega-Lite,展示不同持有期的收益分布
 
 ## 技术栈
 
@@ -15,9 +16,10 @@
 |------|------|
 | 框架 | Next.js 15 (App Router, 静态导出) |
 | UI | React 19, Tailwind CSS 4 |
-| 状态 | Zustand, Jotai |
+| 状态管理 | Jotai (atomWithStorage 持久化) |
+| Worker RPC | kkrpc |
 | 可视化 | Vega-Lite, vega-embed |
-| 计算 | Rust → WebAssembly (Comlink + Web Worker) |
+| 计算 | Rust → WebAssembly |
 | 语言 | TypeScript |
 
 ## 开发
@@ -37,19 +39,14 @@ bun run lint     # ESLint 检查
 
 ```
 src/
-├── app/                 # App Router 路由
-│   ├── layout.tsx       # 根布局(元数据、全局样式)
-│   ├── page.tsx         # 首页
-│   ├── about/           # 关于页
-│   ├── catgame/         # 猫抓鱼(客户端组件)
-│   ├── snake/           # 贪吃蛇(客户端组件)
-│   └── invest/          # 投资模拟(server page + client 组件)
-├── components/layout/   # 主站布局(NavBar / Footer)
-├── features/            # 功能模块
-│   ├── catgame/         # 猫抓鱼游戏
-│   ├── snake/           # 贪吃蛇游戏
-│   └── invest/          # 投资模拟(WASM + Worker + Vega)
-└── store/               # Zustand 全局状态
+├── app/
+│   ├── layout.tsx          # 根布局(metadata / 全局样式)
+│   ├── (site)/             # 路由组:首页 + 关于(共享 NavBar/Footer)
+│   ├── catgame/            # 猫抓鱼:atoms.ts + 组件同级存放
+│   ├── snake/              # 贪吃蛇:atoms.ts + SnakeGame
+│   └── invest/             # 投资模拟:atoms / kkrpc worker / VegaChart / wasm
+├── components/             # 跨路由共享组件(NavBar / Footer)
+└── lib/                    # 纯数据与工具(projects.ts)
 public/
-└── invest/              # CSV 数据与 WASM 二进制(运行时 fetch)
+└── invest/                 # CSV 数据与 WASM 二进制(运行时 fetch)
 ```

@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { SnakeGame } from "@/features/snake/components/game/SnakeGame";
+import { SnakeGame } from "./SnakeGame"
 
 export default function SnakeGamePage() {
-  return <SnakeGame />;
+  return <SnakeGame />
 }

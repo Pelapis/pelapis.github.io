@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { StockSelector } from "@/features/invest/components/StockSelector";
-import VegaChart from "@/features/invest/components/vega";
+import { StockSelector } from "./StockSelector"
+import { VegaChart } from "./VegaChart"
 
 export default function InvestClient() {
   return (
@@ -15,5 +15,5 @@ export default function InvestClient() {
         <VegaChart />
       </main>
     </div>
-  );
+  )
 }
